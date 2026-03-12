@@ -15,27 +15,6 @@ type TokenData = {
   topHolders: { address: string; amount: string; uiAmount: number }[];
 } | null;
 
-const nftBenefits = [
-  "Ring 3 Discord access",
-  "CNDL airdrop eligibility",
-  "Governance voting power",
-  "Revenue share pool",
-  "Elite leaderboard priority",
-];
-
-const stakingTiers = [
-  { tier: "Bronze", minStake: "1,000", apy: "8.5%", holders: null },
-  { tier: "Silver", minStake: "10,000", apy: "12.0%", holders: null },
-  { tier: "Gold", minStake: "50,000", apy: "16.5%", holders: null },
-  { tier: "Diamond", minStake: "200,000", apy: "22.0%", holders: null },
-];
-
-const tierColors: Record<string, string> = {
-  Bronze: "text-orange-400",
-  Silver: "text-gray-300",
-  Gold: "text-yellow-400",
-  Diamond: "text-blue-300",
-};
 
 function formatNum(n: number) {
   if (n >= 1_000_000_000) return (n / 1_000_000_000).toFixed(1) + "B";
@@ -131,91 +110,44 @@ export default function CNDLToken({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {/* Top Holders */}
-        <div className="card p-5">
-          <p className="text-sm font-semibold text-gray-300 mb-4">
-            Top Holders
-            {top10Pct !== null && (
-              <span className="ml-2 text-xs text-gray-500 font-normal">
-                Top 10 hold {top10Pct.toFixed(1)}% of supply
-              </span>
-            )}
-          </p>
-          {topHolders.length === 0 ? (
-            <p className="text-sm text-gray-600">No data</p>
-          ) : (
-            <div className="space-y-3">
-              {topHolders.slice(0, 8).map((h, i) => {
-                const pct = supply ? (h.uiAmount / supply) * 100 : 0;
-                return (
-                  <div key={h.address}>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="text-gray-500 font-mono text-xs">
-                        #{i + 1} {h.address.slice(0, 4)}...{h.address.slice(-4)}
-                      </span>
-                      <div className="flex items-center gap-3">
-                        <span className="text-gray-600 text-xs">{formatNum(h.uiAmount)}</span>
-                        <span className="font-mono text-white font-semibold text-xs">{pct.toFixed(2)}%</span>
-                      </div>
-                    </div>
-                    <div className="h-1.5 rounded-full bg-[#1a1a1a] overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-yellow-400"
-                        style={{ width: `${Math.min(pct * 5, 100)}%` }}
-                      />
+      {/* Top Holders */}
+      <div className="card p-5">
+        <p className="text-sm font-semibold text-gray-300 mb-4">
+          Top Holders
+          {top10Pct !== null && (
+            <span className="ml-2 text-xs text-gray-500 font-normal">
+              Top 10 hold {top10Pct.toFixed(1)}% of supply
+            </span>
+          )}
+        </p>
+        {topHolders.length === 0 ? (
+          <p className="text-sm text-gray-600">No data</p>
+        ) : (
+          <div className="space-y-3">
+            {topHolders.slice(0, 8).map((h, i) => {
+              const pct = supply ? (h.uiAmount / supply) * 100 : 0;
+              return (
+                <div key={h.address}>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-gray-500 font-mono text-xs">
+                      #{i + 1} {h.address.slice(0, 4)}...{h.address.slice(-4)}
+                    </span>
+                    <div className="flex items-center gap-3">
+                      <span className="text-gray-600 text-xs">{formatNum(h.uiAmount)}</span>
+                      <span className="font-mono text-white font-semibold text-xs">{pct.toFixed(2)}%</span>
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Believer NFT */}
-        <div className="card p-5">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-xl">🎖️</span>
-            <p className="text-sm font-semibold text-gray-300">Believer NFT</p>
+                  <div className="h-1.5 rounded-full bg-[#1a1a1a] overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-yellow-400"
+                      style={{ width: `${Math.min(pct * 5, 100)}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
           </div>
-          <p className="text-xs text-gray-500 mb-4">
-            Believer NFTs grant holders exclusive access across the Candle ecosystem.
-          </p>
-          <div className="space-y-2">
-            {nftBenefits.map((b) => (
-              <div key={b} className="flex items-center gap-2 text-sm text-gray-300">
-                <span className="text-yellow-400">✦</span>
-                <span>{b}</span>
-              </div>
-            ))}
-          </div>
-          <div className="mt-5 pt-4 border-t border-[#1c1c1c] flex justify-between text-sm">
-            <span className="text-gray-500">Total Supply</span>
-            <span className="font-bold text-white">1,000 NFTs</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Staking Tiers */}
-      <div className="card overflow-hidden">
-        <div className="px-5 py-4 border-b border-[#1a1a1a]">
-          <p className="text-sm font-semibold text-gray-300">Staking Tiers</p>
-        </div>
-        <div className="grid grid-cols-3 px-5 py-3 text-xs text-gray-500 uppercase tracking-widest border-b border-[#1c1c1c]">
-          <span>Tier</span>
-          <span>Min Stake</span>
-          <span className="text-right">APY</span>
-        </div>
-        {stakingTiers.map((tier) => (
-          <div
-            key={tier.tier}
-            className="grid grid-cols-3 items-center px-5 py-4 border-b border-[#1a1a1a] last:border-0 hover:bg-[#151515] transition-colors"
-          >
-            <span className={`font-bold text-sm ${tierColors[tier.tier]}`}>{tier.tier}</span>
-            <span className="text-sm font-mono text-gray-300">{tier.minStake} CNDL</span>
-            <span className="text-right text-sm font-mono font-bold text-green-400">{tier.apy}</span>
-          </div>
-        ))}
+        )}
       </div>
     </div>
   );

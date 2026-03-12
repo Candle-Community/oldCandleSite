@@ -51,7 +51,8 @@ export async function fetchDiscordData() {
       getRoleMemberCount(ROLE_IDS.elite, token),
     ]);
 
-    return { totalMembers, rings: { verified, holder, believer, elite } };
+    const general = Math.max(0, totalMembers - verified - holder - believer - elite);
+    return { totalMembers, rings: { general, verified, holder, believer, elite } };
   } catch {
     return null;
   }

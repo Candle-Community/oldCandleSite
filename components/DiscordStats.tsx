@@ -1,6 +1,7 @@
 type DiscordData = {
   totalMembers: number;
   rings: {
+    general: number;
     verified: number;
     holder: number;
     believer: number;
@@ -11,6 +12,17 @@ type DiscordData = {
 const rings = [
   {
     ring: 1,
+    key: "general",
+    name: "General",
+    emoji: "🌐",
+    color: "from-gray-500 to-gray-600",
+    borderColor: "border-gray-600",
+    textColor: "text-gray-400",
+    description: "Everyone in the server without a specific role.",
+    perks: ["#general access", "Community announcements", "Public alpha"],
+  },
+  {
+    ring: 2,
     key: "verified",
     name: "Verified",
     emoji: "✅",
@@ -21,7 +33,7 @@ const rings = [
     perks: ["Verified role", "#candle-verified channel", "Holder pathway access"],
   },
   {
-    ring: 2,
+    ring: 3,
     key: "holder",
     name: "Holder",
     emoji: "🔥",
@@ -32,7 +44,7 @@ const rings = [
     perks: ["All Verified perks", "#holder-alpha", "Token-gated channels", "Believer NFT pathway"],
   },
   {
-    ring: 3,
+    ring: 4,
     key: "believer",
     name: "Believer",
     emoji: "💎",
@@ -43,7 +55,7 @@ const rings = [
     perks: ["All Holder perks", "Believer NFT holder", "#believer-only", "Elite invitation pathway"],
   },
   {
-    ring: 4,
+    ring: 5,
     key: "elite",
     name: "Elite",
     emoji: "👑",
@@ -105,23 +117,21 @@ export default function DiscordStats({
       </div>
 
       <div className="space-y-3">
-        <p className="text-sm text-gray-500 font-medium">The 4 Rings</p>
+        <p className="text-sm text-gray-500 font-medium">The 5 Rings</p>
         {ringsWithCounts.map((ring) => {
           const pct = totalMembers && ring.members !== null
             ? Math.round((ring.members / totalMembers) * 100)
             : null;
 
           return (
-            <div key={ring.ring} className={`card p-5 border ${ring.borderColor}`}>
+            <div key={ring.key} className={`card p-5 border ${ring.borderColor}`}>
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">{ring.emoji}</span>
                   <div>
-                    <div className="flex items-center gap-2">
-                      <span className={`font-bold text-base ${ring.textColor}`}>
-                        Ring {ring.ring}: {ring.name}
-                      </span>
-                    </div>
+                    <span className={`font-bold text-base ${ring.textColor}`}>
+                      Ring {ring.ring}: {ring.name}
+                    </span>
                     <p className="text-xs text-gray-500 mt-0.5">{ring.description}</p>
                   </div>
                 </div>

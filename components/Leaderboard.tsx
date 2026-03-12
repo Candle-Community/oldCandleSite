@@ -5,6 +5,7 @@ type LeaderboardRow = {
   total_views: number;
   effective_views: number;
   cndl_owed: string;
+  followers?: number;
 };
 
 function formatNum(n: number) {
@@ -56,16 +57,17 @@ export default function Leaderboard({
         <div className="card p-8 text-center text-gray-500">No approved posts yet.</div>
       ) : (
         <div className="card overflow-hidden">
-          <div className="grid grid-cols-4 px-5 py-3 text-xs text-gray-500 uppercase tracking-widest border-b border-[#1c1c1c]">
+          <div className="grid grid-cols-5 px-5 py-3 text-xs text-gray-500 uppercase tracking-widest border-b border-[#1c1c1c]">
             <span>Rank</span>
             <span>Member</span>
+            <span className="text-right">Followers</span>
             <span className="text-right">Views</span>
             <span className="text-right">$CNDL</span>
           </div>
           {leaderboard.map((m, i) => (
             <div
               key={m.discord_tag}
-              className={`grid grid-cols-4 items-center px-5 py-4 border-b border-[#1a1a1a] last:border-0 hover:bg-[#151515] transition-colors ${
+              className={`grid grid-cols-5 items-center px-5 py-4 border-b border-[#1a1a1a] last:border-0 hover:bg-[#151515] transition-colors ${
                 i < 3 ? "bg-[#111008]" : ""
               }`}
             >
@@ -82,6 +84,9 @@ export default function Leaderboard({
                 </p>
                 <p className="text-xs text-gray-600">@{m.x_handle} · {m.post_count} posts</p>
               </div>
+              <span className="text-right text-sm font-mono text-blue-400">
+                {m.followers != null ? formatNum(m.followers) : "—"}
+              </span>
               <span className="text-right text-sm font-mono text-gray-300">
                 {formatNum(m.total_views)}
               </span>

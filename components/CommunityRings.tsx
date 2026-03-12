@@ -4,6 +4,7 @@ import { useState } from "react";
 type DiscordData = {
   totalMembers: number;
   rings: {
+    general: number;
     verified: number;
     holder: number;
     believer: number;
@@ -13,8 +14,22 @@ type DiscordData = {
 
 const RINGS = [
   {
-    id: "verified",
+    id: "general",
     ring: 1,
+    label: "General",
+    action: "Join Discord",
+    emoji: "🌐",
+    color: "#6b7280",
+    labelColor: "text-gray-400",
+    borderColor: "border-gray-600",
+    bgColor: "bg-gray-600/10",
+    r: 210,
+    sw: 28,
+    perks: ["#general access", "Community announcements", "Public alpha"],
+  },
+  {
+    id: "verified",
+    ring: 2,
     label: "Verified",
     action: "Verify on Candle →",
     emoji: "✅",
@@ -22,13 +37,13 @@ const RINGS = [
     labelColor: "text-cyan-400",
     borderColor: "border-cyan-600",
     bgColor: "bg-cyan-600/10",
-    r: 185,
-    sw: 30,
+    r: 165,
+    sw: 28,
     perks: ["Verified role", "#candle-verified channel", "Holder pathway access"],
   },
   {
     id: "holder",
-    ring: 2,
+    ring: 3,
     label: "Holder",
     action: "Buy $CNDL →",
     emoji: "🔥",
@@ -36,13 +51,13 @@ const RINGS = [
     labelColor: "text-orange-400",
     borderColor: "border-orange-600",
     bgColor: "bg-orange-600/10",
-    r: 140,
-    sw: 30,
+    r: 120,
+    sw: 28,
     perks: ["#holder-alpha", "Token-gated channels", "Believer NFT pathway"],
   },
   {
     id: "believer",
-    ring: 3,
+    ring: 4,
     label: "Believer",
     action: "Mint Believer NFT →",
     emoji: "💎",
@@ -50,13 +65,13 @@ const RINGS = [
     labelColor: "text-purple-400",
     borderColor: "border-purple-600",
     bgColor: "bg-purple-600/10",
-    r: 95,
-    sw: 30,
+    r: 75,
+    sw: 28,
     perks: ["Believer NFT holder", "#believer-only", "Elite invitation pathway"],
   },
   {
     id: "elite",
-    ring: 4,
+    ring: 5,
     label: "Elite",
     action: "Invitation only",
     emoji: "👑",
@@ -64,16 +79,17 @@ const RINGS = [
     labelColor: "text-yellow-400",
     borderColor: "border-yellow-500",
     bgColor: "bg-yellow-500/10",
-    r: 44,
+    r: 36,
     sw: 0,
     perks: ["Direct team access", "Revenue share", "Strategy sessions", "Founding member status"],
   },
 ];
 
 const LABEL_ANGLES: Record<string, number> = {
-  verified: 315,
-  holder: 45,
-  believer: 135,
+  general: 315,
+  verified: 45,
+  holder: 135,
+  believer: 225,
 };
 
 const CX = 250;
@@ -100,7 +116,7 @@ export default function CommunityRings({ discordData }: { discordData: DiscordDa
         <div className="w-1 h-6 bg-gradient-to-b from-yellow-400 to-orange-500 rounded-full" />
         <h2 className="text-2xl font-bold">Community Rings</h2>
         <span className="text-xs text-gray-600 border border-[#222] rounded-full px-3 py-1 ml-2">
-          4 Rings{totalMembers !== null ? ` · ${totalMembers.toLocaleString()} members` : ""}
+          5 Rings{totalMembers !== null ? ` · ${totalMembers.toLocaleString()} members` : ""}
         </span>
       </div>
 
@@ -108,15 +124,15 @@ export default function CommunityRings({ discordData }: { discordData: DiscordDa
         {/* SVG Diagram */}
         <div className="flex-shrink-0 w-full lg:w-[460px]">
           <svg viewBox="0 0 500 500" className="w-full" style={{ maxHeight: 460 }}>
-            <circle cx={CX} cy={CY} r={230} fill="rgba(255,255,255,0.015)" />
+            <circle cx={CX} cy={CY} r={238} fill="rgba(255,255,255,0.015)" />
 
-            {/* Stroke rings (Verified → Believer) */}
-            {ringsWithCounts.slice(0, 3).map((ring) => {
+            {/* Stroke rings (General → Believer) */}
+            {ringsWithCounts.slice(0, 4).map((ring) => {
               const isActive = hovered === ring.id;
               const isDimmed = hovered !== null && !isActive;
               const angle = LABEL_ANGLES[ring.id];
-              const labelR = ring.r + ring.sw / 2 + 22;
-              const dot = polarToXY(CX, CY, ring.r + ring.sw / 2 + 6, angle);
+              const labelR = ring.r + ring.sw / 2 + 20;
+              const dot = polarToXY(CX, CY, ring.r + ring.sw / 2 + 5, angle);
               const label = polarToXY(CX, CY, labelR, angle);
 
               return (
@@ -156,7 +172,7 @@ export default function CommunityRings({ discordData }: { discordData: DiscordDa
 
             {/* Elite — filled center */}
             {(() => {
-              const elite = ringsWithCounts[3];
+              const elite = ringsWithCounts[4];
               const isActive = hovered === "elite";
               const isDimmed = hovered !== null && !isActive;
               return (
@@ -173,13 +189,13 @@ export default function CommunityRings({ discordData }: { discordData: DiscordDa
                     onMouseEnter={() => setHovered("elite")}
                     onMouseLeave={() => setHovered(null)}
                   />
-                  <text x={CX} y={CY - 9} textAnchor="middle" fontSize="18" style={{ pointerEvents: "none" }}>
+                  <text x={CX} y={CY - 9} textAnchor="middle" fontSize="16" style={{ pointerEvents: "none" }}>
                     👑
                   </text>
                   <text
                     x={CX} y={CY + 10}
                     textAnchor="middle"
-                    fill="#0a0a0a" fontSize="10" fontWeight="800" letterSpacing="2"
+                    fill="#0a0a0a" fontSize="9" fontWeight="800" letterSpacing="2"
                     style={{ pointerEvents: "none" }}
                   >
                     ELITE
