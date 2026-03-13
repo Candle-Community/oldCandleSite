@@ -1,0 +1,1600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>$CHAD Arcade — Candle TV</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#06100a;--bg1:#0a1a0d;--bg2:#0f2213;
+  --green:#00e554;--bright:#00ff5e;--gdim:rgba(0,229,84,.1);--glow:rgba(0,229,84,.25);
+  --border:rgba(0,229,84,.12);--border2:rgba(0,229,84,.28);
+  --white:#eef5ee;--muted:#3d6645;--muted2:#527a5a;
+  --red:#ff3a3a;--gold:#f5c518;--r:14px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{min-height:100vh;background:#000;color:#fff;font-family:'Manrope',sans-serif;overflow-x:hidden;}
+body{padding-top:60px;}
+
+/* TICKER */
+.ticker-wrap{background:#000;border-bottom:1px solid rgba(0,229,84,.12);height:32px;overflow:hidden;display:flex;align-items:center;}
+.ticker-inner{display:flex;animation:marquee 28s linear infinite;white-space:nowrap;}
+.ticker-inner span{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--green);padding:0 32px;}
+.ticker-inner .dot{color:rgba(0,229,84,.3);}
+@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:300;height:60px;padding:0 32px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;background:rgba(0,0,0,.96);backdrop-filter:blur(24px);border-bottom:1px solid rgba(0,229,84,.12);}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:#fff;display:flex;align-items:center;gap:8px;cursor:pointer;transition:color .2s;justify-self:start;}
+.nav-logo:hover{color:var(--bright);}
+.nav-pip{width:6px;height:6px;border-radius:50%;background:var(--bright);animation:pip 2s ease infinite;box-shadow:0 0 8px var(--green);}
+.nav-center{text-align:center;}
+.nav-arcade-link{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;color:rgba(255,255,255,.45);text-transform:uppercase;cursor:pointer;background:none;border:none;padding:6px 12px;transition:color .2s;}
+.nav-arcade-link:hover{color:var(--bright);}
+.nav-right{display:flex;align-items:center;gap:10px;justify-self:end;}
+.nav-user-pill{background:rgba(0,229,84,.07);border:1px solid rgba(0,229,84,.22);border-radius:100px;padding:6px 14px;font-family:'DM Mono',monospace;font-size:10px;color:var(--green);letter-spacing:1px;display:none;align-items:center;}
+.nav-user-pill.show{display:flex;}
+.disconnect-btn{background:transparent;border:1px solid rgba(255,58,58,.3);color:var(--red);font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;padding:5px 10px;border-radius:100px;cursor:pointer;transition:all .2s;}
+.disconnect-btn:hover{background:rgba(255,58,58,.1);}
+.nav-connect-btn{background:var(--green);color:#000;font-family:'DM Mono',monospace;font-size:10px;font-weight:700;letter-spacing:2px;padding:7px 16px;border-radius:100px;border:none;cursor:pointer;transition:all .2s;display:block;}
+.nav-connect-btn.hidden{display:none!important;}
+.nav-connect-btn:hover{background:var(--bright);}
+
+/* LOGIN MODAL */
+.login-overlay{position:fixed;inset:0;z-index:999;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);}
+.login-overlay.open{display:flex;}
+.login-box{background:#0a0a0a;border:1px solid rgba(0,229,84,.2);border-radius:16px;padding:40px 36px;max-width:420px;width:90%;}
+.login-title{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:3px;color:#fff;margin-bottom:6px;}
+.login-sub{font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.35);line-height:1.8;margin-bottom:28px;}
+.login-field{margin-bottom:18px;}
+.login-field label{display:block;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--green);margin-bottom:8px;}
+.login-field input{width:100%;background:#000;border:1px solid rgba(0,229,84,.2);border-radius:8px;padding:12px 14px;color:#fff;font-family:'DM Mono',monospace;font-size:12px;outline:none;transition:border-color .2s;}
+.login-field input:focus{border-color:rgba(0,229,84,.6);}
+.login-field input::placeholder{color:rgba(255,255,255,.2);}
+.login-error{font-family:'DM Mono',monospace;font-size:10px;color:#ff3a3a;margin-bottom:16px;padding:10px 14px;background:rgba(255,58,58,.08);border-radius:6px;border:1px solid rgba(255,58,58,.2);}
+.login-submit-btn{width:100%;padding:15px;background:var(--green);color:#000;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;border:none;border-radius:100px;cursor:pointer;transition:all .2s;margin-bottom:12px;}
+.login-submit-btn:hover{background:var(--bright);box-shadow:0 0 30px rgba(0,255,94,.2);}
+.login-cancel{display:block;width:100%;background:none;border:none;font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.3);cursor:pointer;letter-spacing:1px;transition:color .2s;text-align:center;padding:4px;}
+.login-cancel:hover{color:rgba(255,255,255,.6);}
+
+/* SCREENS */
+.screen{display:none;}
+.screen.active{display:block;}
+#screen-game.active{display:flex;}
+#screen-gameover.active{display:flex;}
+
+/* ══ PAGE 1 — HERO SCREEN ══ */
+#screen-hero{background:#000;}
+
+/* SECTION 1 — HERO */
+.s-hero{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#000;overflow:hidden;}
+.s-hero-particles{position:absolute;inset:0;pointer-events:none;z-index:0;}
+.s-hero-dot{position:absolute;border-radius:50%;animation:float-dot linear infinite;}
+@keyframes float-dot{0%{opacity:0;transform:translateY(0)}10%{opacity:1}85%{opacity:.4}100%{opacity:0;transform:translateY(-100vh)}}
+.s-hero-content{position:relative;z-index:2;text-align:center;padding:0 24px;}
+.s-hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(100px,20vw,220px);line-height:.85;letter-spacing:4px;color:#fff;animation:hero-glow 4s ease-in-out infinite;}
+@keyframes hero-glow{0%,100%{text-shadow:0 0 60px rgba(0,229,84,.15),0 0 120px rgba(0,229,84,.06)}50%{text-shadow:0 0 80px rgba(0,229,84,.25),0 0 160px rgba(0,229,84,.1)}}
+.s-hero-tagline{font-family:'DM Mono',monospace;font-size:clamp(10px,1.8vw,13px);letter-spacing:8px;color:rgba(0,229,84,.65);margin:28px 0 16px;text-transform:uppercase;}
+.s-hero-desc{font-family:'Manrope',sans-serif;font-size:clamp(14px,1.8vw,17px);color:rgba(255,255,255,.38);margin-bottom:52px;letter-spacing:.3px;}
+.s-hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+.btn-primary{padding:15px 38px;background:var(--green);color:#000;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:3px;border:none;border-radius:100px;cursor:pointer;transition:all .22s;display:inline-flex;align-items:center;}
+.btn-primary:hover{background:var(--bright);box-shadow:0 0 40px rgba(0,255,94,.3);transform:translateY(-2px);}
+.btn-outline{padding:15px 38px;background:transparent;color:var(--green);font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:3px;border:1px solid rgba(0,229,84,.5);border-radius:100px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;transition:all .22s;}
+.btn-outline:hover{border-color:var(--green);background:rgba(0,229,84,.06);transform:translateY(-2px);}
+.s-hero-scroll{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);z-index:2;}
+.scroll-arrow{width:18px;height:18px;border-right:1.5px solid rgba(0,229,84,.4);border-bottom:1.5px solid rgba(0,229,84,.4);transform:rotate(45deg);animation:bounce-down 2s ease-in-out infinite;}
+@keyframes bounce-down{0%,100%{transform:rotate(45deg) translateY(-4px);opacity:.35}50%{transform:rotate(45deg) translateY(4px);opacity:.9}}
+@keyframes pip{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.6)}}
+
+/* SECTION 2 — STATEMENT */
+.s-statement{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#000;padding:80px 48px;}
+.s-statement-inner{max-width:880px;text-align:center;line-height:1.15;}
+.s-word{font-family:'Bebas Neue',sans-serif;font-size:clamp(32px,5.5vw,68px);letter-spacing:3px;color:#fff;opacity:.1;transition:opacity .6s ease,color .6s ease;display:inline-block;margin:0 5px 4px;}
+.s-word.lit{opacity:1;}
+.s-word.accent{color:var(--bright);}
+
+/* SECTION 3 — HOW IT WORKS */
+.s-hiw{background:#000;padding:130px 24px;}
+.s-section-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:6px;color:var(--green);text-align:center;text-transform:uppercase;margin-bottom:80px;}
+.s-hiw-steps{max-width:920px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);position:relative;}
+.s-hiw-steps::after{content:'';position:absolute;top:34px;left:16%;right:16%;height:1px;background:linear-gradient(90deg,transparent,rgba(0,229,84,.25) 20%,rgba(0,229,84,.25) 80%,transparent);}
+.s-hiw-step{padding:0 36px 0 28px;border-left:1px solid rgba(0,229,84,.15);}
+.s-hiw-step:first-child{border-left:none;padding-left:0;}
+.s-hiw-num{font-family:'Bebas Neue',sans-serif;font-size:72px;color:rgba(0,229,84,.08);line-height:1;margin-bottom:18px;}
+.s-hiw-title{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;color:#fff;margin-bottom:12px;}
+.s-hiw-desc{font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,.35);line-height:1.9;}
+
+/* SECTION 4 — ARCADE PREVIEW */
+.s-arcade-prev{background:#000;padding:130px 24px;position:relative;}
+.s-arcade-prev::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 50% 50%,rgba(0,229,84,.02),transparent 70%);pointer-events:none;}
+.s-arcade-inner{max-width:920px;margin:0 auto;}
+.s-arcade-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:48px;}
+.s-acard{background:#080808;border:1px solid rgba(255,255,255,.06);border-radius:16px;overflow:hidden;transition:all .25s;position:relative;cursor:pointer;}
+.s-acard:hover{border-color:rgba(0,229,84,.5);transform:translateY(-7px);box-shadow:0 24px 60px rgba(0,229,84,.1);}
+.s-acard-thumb{height:150px;display:flex;align-items:center;justify-content:center;font-size:64px;background:#040404;position:relative;}
+.s-acard-lock{position:absolute;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;backdrop-filter:blur(2px);}
+.s-acard-lock-icon{font-size:22px;}
+.s-acard-lock-txt{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:3px;color:rgba(255,255,255,.35);}
+.s-acard-body{padding:20px 22px;}
+.s-acard-name{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;color:#fff;margin-bottom:6px;}
+.s-acard-desc{font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.3);line-height:1.6;}
+.s-arcade-cta{text-align:center;}
+.no-phantom{font-family:'DM Mono',monospace;font-size:11px;color:var(--red);margin-top:14px;letter-spacing:.5px;}
+.no-phantom a{color:var(--green);}
+
+/* SECTION 5 — HOW TO BUY */
+.s-buy{background:#000;padding:130px 24px;}
+.s-buy-steps{max-width:900px;margin:0 auto 52px;display:grid;grid-template-columns:repeat(4,1fr);gap:40px;}
+.s-buy-step{}
+.s-buy-num{font-family:'Bebas Neue',sans-serif;font-size:56px;color:var(--green);line-height:1;margin-bottom:12px;opacity:.9;}
+.s-buy-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:#fff;margin-bottom:8px;}
+.s-buy-desc{font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.35);line-height:1.8;}
+.s-buy-cta{text-align:center;}
+
+/* SECTION 6 — FAQ */
+.s-faq{background:#000;padding:130px 24px;}
+.faq2-list{max-width:680px;margin:0 auto;}
+.faq2-item{border-bottom:1px solid rgba(0,229,84,.1);}
+.faq2-item:first-child{border-top:1px solid rgba(0,229,84,.1);}
+.faq2-q{display:flex;align-items:center;justify-content:space-between;padding:24px 0;cursor:pointer;gap:16px;user-select:none;}
+.faq2-q-text{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:rgba(255,255,255,.75);transition:color .2s;}
+.faq2-item.open .faq2-q-text{color:#fff;}
+.faq2-icon{font-size:20px;color:rgba(0,229,84,.5);transition:transform .3s ease;flex-shrink:0;font-family:'DM Mono',monospace;line-height:1;font-weight:300;}
+.faq2-item.open .faq2-icon{transform:rotate(45deg);color:var(--green);}
+.faq2-a{font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,.4);line-height:1.9;overflow:hidden;max-height:0;transition:max-height .4s ease,padding .4s ease;padding-bottom:0;}
+.faq2-item.open .faq2-a{max-height:160px;padding-bottom:24px;}
+
+/* SECTION 7 — FOOTER */
+.s-footer{background:#000;border-top:1px solid rgba(0,229,84,.08);padding:52px 32px 28px;}
+.s-footer-main{max-width:960px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:24px;padding-bottom:28px;border-bottom:1px solid rgba(255,255,255,.05);}
+.s-footer-logo{font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:3px;color:#fff;}
+.s-footer-built{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:4px;color:rgba(255,255,255,.22);text-transform:uppercase;text-align:center;}
+.s-footer-links{display:flex;gap:20px;align-items:center;}
+.s-footer-links a{font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.35);text-decoration:none;letter-spacing:2px;text-transform:uppercase;transition:color .2s;display:flex;align-items:center;}
+.s-footer-links a:hover{color:var(--bright);}
+.s-footer-links a svg{opacity:.5;transition:opacity .2s;}
+.s-footer-links a:hover svg{opacity:1;}
+.s-footer-disc{max-width:960px;margin:18px auto 0;font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,.15);letter-spacing:.5px;text-align:center;}
+
+/* SCROLL REVEAL */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+.reveal-d1{transition-delay:.1s;}
+.reveal-d2{transition-delay:.25s;}
+.reveal-d3{transition-delay:.4s;}
+.reveal-d4{transition-delay:.55s;}
+
+
+/* ══ ARCADE ══ */
+.timer-bar{background:var(--bg1);border-bottom:1px solid var(--border);padding:10px 24px;text-align:center;display:flex;align-items:center;justify-content:center;gap:24px;flex-wrap:wrap;}
+.timer-label{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);letter-spacing:2px;text-transform:uppercase;}
+.timer-value{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--green);letter-spacing:3px;animation:countdown-pulse 1s ease infinite;}
+@keyframes countdown-pulse{0%,100%{color:var(--green)}50%{color:var(--bright);text-shadow:0 0 10px var(--bright)}}
+.prize-strip{font-family:'DM Mono',monospace;font-size:10px;color:var(--gold);letter-spacing:1px;}
+
+/* GAME SELECT */
+.select-section{max-width:960px;margin:0 auto;padding:40px 24px;}
+.select-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,8vw,72px);letter-spacing:4px;color:var(--white);text-align:center;margin-bottom:32px;}
+.games-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-bottom:40px;}
+.gcard{background:#000;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:all .22s;position:relative;}
+.gcard:hover{border-color:var(--green);transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,229,84,.15);}
+.gcard::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--bright),transparent);opacity:0;transition:opacity .2s;}
+.gcard:hover::before{opacity:1;}
+.gcard-preview{height:160px;display:flex;align-items:center;justify-content:center;background:var(--bg2);position:relative;overflow:hidden;}
+.gcard-preview::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,rgba(0,229,84,.06),transparent 70%);}
+.game-anim-flappy{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;}
+.anim-bird{font-size:42px;animation:bird-bob .6s ease-in-out infinite;}
+.anim-pipe{position:absolute;width:18px;background:linear-gradient(90deg,#4a3200,#f5c518,#4a3200);border-radius:2px;}
+.anim-pipe.top{top:0;height:55px;right:60px;animation:pipe-slide 2s linear infinite;}
+.anim-pipe.bot{bottom:0;height:50px;right:60px;animation:pipe-slide 2s linear infinite;}
+@keyframes bird-bob{0%,100%{transform:translateY(-4px) rotate(-5deg)}50%{transform:translateY(4px) rotate(5deg)}}
+@keyframes pipe-slide{0%{right:-20px}100%{right:120px}}
+.game-anim-dodge{position:relative;width:100%;height:100%;overflow:hidden;}
+.anim-chad{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);font-size:32px;animation:dodge-sway 1.5s ease-in-out infinite;}
+@keyframes dodge-sway{0%,100%{left:45%}50%{left:55%}}
+@keyframes block-fall{0%{top:-20px;opacity:1}100%{top:120px;opacity:0}}
+.game-anim-moon{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;}
+.anim-coin{font-size:52px;animation:coin-spin 1.2s linear infinite;}
+@keyframes coin-spin{0%{transform:rotateY(0)}100%{transform:rotateY(360deg)}}
+.gcard-body{padding:20px;}
+.gcard-num{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:4px;color:var(--green);text-transform:uppercase;margin-bottom:4px;}
+.gcard-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;margin-bottom:6px;}
+.gcard-desc{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);line-height:1.7;margin-bottom:16px;}
+.gcard-diff{display:inline-block;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;padding:3px 8px;border-radius:100px;margin-bottom:12px;}
+.diff-easy{background:rgba(0,229,84,.1);color:var(--green);border:1px solid rgba(0,229,84,.2);}
+.diff-med{background:rgba(245,197,24,.1);color:var(--gold);border:1px solid rgba(245,197,24,.2);}
+.diff-hard{background:rgba(255,58,58,.1);color:var(--red);border:1px solid rgba(255,58,58,.2);}
+.gcard-scores{display:flex;gap:16px;margin-bottom:16px;}
+.gscore-item{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);}
+.gscore-item span{color:var(--gold);font-weight:600;display:block;font-size:13px;margin-top:2px;}
+.gscore-item .user-score{color:var(--green);}
+.gcard-foot{display:flex;justify-content:flex-end;}
+.play-btn{padding:10px 24px;background:var(--green);color:#06100a;font-family:'Manrope',sans-serif;font-size:13px;font-weight:800;border:none;border-radius:100px;cursor:pointer;transition:all .2s;letter-spacing:.3px;}
+.play-btn:hover{background:var(--bright);box-shadow:0 4px 20px var(--glow);}
+.your-stats{background:var(--bg1);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:32px;display:flex;gap:32px;flex-wrap:wrap;align-items:center;}
+.your-stats-title{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:3px;color:var(--muted2);margin-right:16px;}
+.your-stat{text-align:center;}
+.your-stat-val{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--bright);display:block;}
+.your-stat-lbl{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);letter-spacing:2px;}
+.lb-preview{background:var(--bg1);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:24px;}
+.lb-preview-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--white);margin-bottom:16px;}
+.lb-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-family:'DM Mono',monospace;font-size:11px;}
+.lb-row:last-child{border-bottom:none;}
+.lb-rank{width:28px;color:var(--muted2);font-size:12px;text-align:center;}
+.lb-medal{width:20px;text-align:center;}
+.lb-wallet{flex:1;color:var(--white);}
+.lb-wallet.me{color:var(--green);}
+.lb-game{color:var(--muted2);font-size:9px;letter-spacing:1px;}
+.lb-score{color:var(--gold);font-weight:600;min-width:60px;text-align:right;}
+.lb-xpost{color:var(--green);font-size:10px;}
+.lb-xpost.no{color:var(--muted);}
+.view-lb-btn{display:block;width:100%;padding:12px;background:transparent;border:1px solid var(--border2);color:var(--green);font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:3px;border-radius:100px;cursor:pointer;transition:all .2s;text-align:center;margin-top:16px;}
+.view-lb-btn:hover{background:var(--gdim);border-color:var(--green);}
+
+/* PROFILE CARD */
+.profile-card{background:var(--bg1);border:1px solid var(--border2);border-radius:var(--r);padding:16px 20px;margin-bottom:24px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+.profile-avatar{font-size:40px;flex-shrink:0;}
+.profile-meta{flex:1;min-width:160px;}
+.profile-wallet-addr{font-family:'DM Mono',monospace;font-size:12px;color:var(--green);letter-spacing:1px;}
+.profile-joined{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);letter-spacing:1px;margin-top:4px;}
+.profile-stats-row{display:flex;gap:20px;flex-wrap:wrap;margin-top:10px;}
+.profile-stat{text-align:center;}
+.profile-stat span{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--bright);display:block;}
+.profile-stat label{font-family:'DM Mono',monospace;font-size:8px;color:var(--muted2);letter-spacing:1px;text-transform:uppercase;}
+
+/* GAME SCREEN */
+#screen-game{min-height:calc(100vh - 60px);align-items:center;justify-content:center;padding:20px;flex-direction:column;background:var(--bg);}
+.canvas-wrap{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:0 0 60px rgba(0,229,84,.08);}
+canvas{display:block;}
+
+/* GAME OVER */
+#screen-gameover{min-height:calc(100vh - 60px);align-items:center;justify-content:center;padding:24px;flex-direction:column;gap:0;background:var(--bg);}
+.receipt{background:#f4efe4;color:#111;width:310px;border-radius:3px;padding:26px 22px 32px;font-family:'DM Mono',monospace;position:relative;box-shadow:0 24px 80px rgba(0,0,0,.7);flex-shrink:0;}
+.receipt::before{content:'';position:absolute;top:-9px;left:0;right:0;height:9px;background:repeating-linear-gradient(90deg,transparent 0,transparent 9px,#f4efe4 9px,#f4efe4 18px);clip-path:polygon(0 100%,3% 0,6% 100%,9% 0,12% 100%,15% 0,18% 100%,21% 0,24% 100%,27% 0,30% 100%,33% 0,36% 100%,39% 0,42% 100%,45% 0,48% 100%,51% 0,54% 100%,57% 0,60% 100%,63% 0,66% 100%,69% 0,72% 100%,75% 0,78% 100%,81% 0,84% 100%,87% 0,90% 100%,93% 0,96% 100%,99% 0,100% 100%);}
+.receipt::after{content:'';position:absolute;bottom:-9px;left:0;right:0;height:9px;background:repeating-linear-gradient(90deg,transparent 0,transparent 9px,#f4efe4 9px,#f4efe4 18px);clip-path:polygon(0 0,3% 100%,6% 0,9% 100%,12% 0,15% 100%,18% 0,21% 100%,24% 0,27% 100%,30% 0,33% 100%,36% 0,39% 100%,42% 0,45% 100%,48% 0,51% 100%,54% 0,57% 100%,60% 0,63% 100%,66% 0,69% 100%,72% 0,75% 100%,78% 0,81% 100%,84% 0,87% 100%,90% 0,93% 100%,96% 0,99% 100%,100% 0);}
+.r-logo{text-align:center;font-size:12px;font-weight:700;letter-spacing:4px;text-transform:uppercase;margin-bottom:2px;}
+.r-sub{text-align:center;font-size:9px;letter-spacing:2px;color:#888;margin-bottom:14px;}
+.r-divider{border:none;border-top:1px dashed #c0b89a;margin:10px 0;}
+.r-row{display:flex;justify-content:space-between;font-size:10px;margin-bottom:4px;color:#555;}
+.r-row.bold{font-weight:700;color:#111;}
+.r-score-lbl{text-align:center;font-size:9px;letter-spacing:3px;color:#999;margin:10px 0 2px;text-transform:uppercase;}
+.r-score{text-align:center;font-family:'Bebas Neue',sans-serif;font-size:64px;letter-spacing:-1px;color:#111;line-height:1;margin-bottom:6px;}
+.r-barcode{text-align:center;margin:12px 0 4px;}
+.r-barcode svg{width:150px;height:30px;}
+.r-powered{text-align:center;font-size:8px;color:#aaa;letter-spacing:2px;text-transform:uppercase;margin-top:6px;}
+.r-weekly{background:#111;color:#00e554;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.5px;text-align:center;padding:10px;line-height:1.8;margin-top:14px;border-radius:2px;}
+.r-weekly strong{color:#fff;}
+.go-btns{display:flex;gap:10px;margin-top:28px;flex-wrap:wrap;justify-content:center;}
+.share-btn{display:inline-flex;align-items:center;gap:8px;padding:13px 20px;background:#000;color:#fff;font-family:'Manrope',sans-serif;font-size:13px;font-weight:800;border:none;border-radius:100px;cursor:pointer;text-decoration:none;transition:all .2s;}
+.share-btn:hover{background:#1a1a1a;transform:translateY(-1px);}
+.mark-posted-btn{padding:10px 16px;background:transparent;color:var(--green);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;border:1px solid var(--border2);border-radius:100px;cursor:pointer;transition:all .2s;margin-top:8px;}
+.mark-posted-btn:hover{background:var(--gdim);}
+.mark-posted-btn.posted{color:var(--muted2);border-color:var(--border);cursor:default;}
+.retry-btn{padding:13px 22px;background:var(--green);color:#06100a;font-family:'Manrope',sans-serif;font-size:14px;font-weight:800;border:none;border-radius:100px;cursor:pointer;transition:all .2s;}
+.retry-btn:hover{background:var(--bright);box-shadow:0 4px 16px var(--glow);}
+.menu-btn2{padding:13px 20px;background:transparent;color:var(--muted2);font-family:'Manrope',sans-serif;font-size:13px;font-weight:700;border:1px solid var(--border);border-radius:100px;cursor:pointer;transition:all .2s;}
+.menu-btn2:hover{border-color:var(--green);color:var(--green);}
+
+/* LEADERBOARD PAGE */
+#screen-leaderboard{padding:40px 24px;max-width:900px;margin:0 auto;background:var(--bg);}
+.lb-page-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(48px,10vw,96px);letter-spacing:4px;color:var(--white);text-align:center;margin-bottom:8px;text-shadow:0 0 40px rgba(0,255,94,.2);}
+.lb-page-sub{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);text-align:center;letter-spacing:2px;margin-bottom:28px;}
+.lb-timer-wrap{text-align:center;margin-bottom:16px;}
+.lb-prize-break{display:flex;justify-content:center;gap:24px;margin-bottom:24px;flex-wrap:wrap;}
+.lb-prize-item{background:var(--bg1);border:1px solid var(--border);border-radius:10px;padding:14px 22px;text-align:center;}
+.lb-prize-medal{font-size:24px;display:block;margin-bottom:4px;}
+.lb-prize-val{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold);}
+.lb-prize-lbl{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted2);letter-spacing:1px;}
+.lb-notice{background:rgba(0,229,84,.04);border:1px solid var(--border);border-radius:10px;padding:16px 20px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);line-height:1.8;margin-bottom:28px;}
+.lb-notice strong{color:var(--green);}
+.lb-tabs{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;}
+.lb-tab{padding:8px 18px;background:var(--bg1);border:1px solid var(--border);border-radius:100px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted2);cursor:pointer;transition:all .2s;}
+.lb-tab.active{background:var(--green);color:#06100a;border-color:var(--green);font-weight:700;}
+.lb-toggle{display:flex;gap:0;margin-bottom:20px;border:1px solid var(--border);border-radius:100px;overflow:hidden;width:fit-content;}
+.lb-tog-btn{padding:7px 18px;background:transparent;border:none;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--muted2);cursor:pointer;transition:all .2s;}
+.lb-tog-btn.active{background:var(--green);color:#06100a;font-weight:700;}
+.lb-table{width:100%;border-collapse:collapse;margin-bottom:32px;}
+.lb-table th{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);}
+.lb-table td{font-family:'DM Mono',monospace;font-size:11px;padding:10px 10px;border-bottom:1px solid rgba(0,229,84,.05);color:var(--white);}
+.lb-table tr.me td{background:rgba(0,229,84,.05);color:var(--green);}
+.lb-xbadge{display:inline-block;font-size:9px;padding:2px 6px;border-radius:4px;}
+.lb-xbadge.yes{background:rgba(0,229,84,.15);color:var(--green);}
+.lb-xbadge.no{background:rgba(255,58,58,.1);color:var(--muted);}
+.htw-section{background:var(--bg1);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:32px;}
+.htw-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--white);margin-bottom:18px;}
+.htw-step{display:flex;gap:14px;margin-bottom:14px;align-items:flex-start;}
+.htw-num{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--green);line-height:1;min-width:32px;}
+.htw-text{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted2);line-height:1.8;padding-top:4px;}
+.htw-note{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);line-height:1.7;margin-top:16px;padding-top:16px;border-top:1px solid var(--border);}
+
+/* UTILS */
+.hidden{display:none!important;}
+.shake{animation:shake .4s ease;}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+
+@media(max-width:768px){
+  nav{grid-template-columns:auto auto;gap:8px;}
+  .nav-center{display:none;}
+  .s-hiw-steps{grid-template-columns:1fr;}
+  .s-hiw-step{border-left:none;border-top:1px solid rgba(0,229,84,.15);padding:28px 0 0;margin-top:0;}
+  .s-hiw-step:first-child{border-top:none;padding-top:0;}
+  .s-hiw-steps::after{display:none;}
+  .s-arcade-grid{grid-template-columns:1fr;}
+  .s-buy-steps{grid-template-columns:repeat(2,1fr);}
+  .s-statement{padding:80px 28px;}
+  .s-footer-main{flex-direction:column;align-items:center;text-align:center;}
+}
+@media(max-width:480px){
+  .s-buy-steps{grid-template-columns:1fr;}
+  nav{padding:0 16px;}
+  .s-hero-btns{flex-direction:column;align-items:center;}
+}
+</style>
+</head>
+<body>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker-inner">
+    <span>$CHAD</span><span class="dot">·</span><span>POWERED BY CANDLE.TV</span><span class="dot">·</span><span>JEETS OUT CHADS IN</span><span class="dot">·</span><span>$CHAD</span><span class="dot">·</span><span>WEEKLY PRIZES — $100 · $50 · $25 IN $CHAD</span><span class="dot">·</span><span>PLAY ARCADE · POST ON X · WIN EVERY SUNDAY</span><span class="dot">·</span>
+    <span>$CHAD</span><span class="dot">·</span><span>POWERED BY CANDLE.TV</span><span class="dot">·</span><span>JEETS OUT CHADS IN</span><span class="dot">·</span><span>$CHAD</span><span class="dot">·</span><span>WEEKLY PRIZES — $100 · $50 · $25 IN $CHAD</span><span class="dot">·</span><span>PLAY ARCADE · POST ON X · WIN EVERY SUNDAY</span><span class="dot">·</span>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div style="display:flex;align-items:center;gap:14px;">
+    <a href="/" style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:rgba(0,229,84,.45);text-decoration:none;display:flex;align-items:center;gap:4px;white-space:nowrap;transition:color .2s;" onmouseover="this.style.color='#00e554'" onmouseout="this.style.color='rgba(0,229,84,.45)'">← ELITE</a>
+    <div class="nav-logo" onclick="goHome()"><div class="nav-pip"></div>$CHAD</div>
+  </div>
+  <div class="nav-center">
+    <button class="nav-arcade-link" onclick="handleEnterArcade()">ARCADE</button>
+  </div>
+  <div class="nav-right">
+    <div class="nav-user-pill" id="nav-user-pill">
+      <span id="nav-user-name"></span>
+    </div>
+    <button class="nav-connect-btn" id="nav-connect-btn" onclick="showLoginModal()">CONNECT</button>
+    <button class="disconnect-btn hidden" id="nav-logout-btn" onclick="logoutUser()">LOGOUT</button>
+  </div>
+</nav>
+
+<!-- ══ HERO SCREEN ══ -->
+<div id="screen-hero" class="screen active">
+
+  <!-- SECTION 1: HERO -->
+  <section class="s-hero">
+    <div class="s-hero-particles" id="hero-particles"></div>
+    <div class="s-hero-content">
+      <h1 class="s-hero-title">$CHAD</h1>
+      <p class="s-hero-tagline">JEETS OUT. CHADS IN.</p>
+      <p class="s-hero-desc">The memecoin with an arcade. Built on Solana via Candle TV.</p>
+      <div class="s-hero-btns">
+        <button class="btn-primary" onclick="handleEnterArcade()">ENTER ARCADE</button>
+        <a class="btn-outline" href="https://candle.tv" target="_blank">BUY $CHAD</a>
+      </div>
+    </div>
+    <div class="s-hero-scroll"><div class="scroll-arrow"></div></div>
+  </section>
+
+  <!-- SECTION 2: STATEMENT -->
+  <section class="s-statement">
+    <div class="s-statement-inner" id="statement-words"></div>
+  </section>
+
+  <!-- SECTION 3: HOW IT WORKS -->
+  <section class="s-hiw">
+    <div class="s-section-label reveal">HOW IT WORKS</div>
+    <div class="s-hiw-steps">
+      <div class="s-hiw-step reveal reveal-d1">
+        <div class="s-hiw-num">01</div>
+        <div class="s-hiw-title">Get $CHAD</div>
+        <div class="s-hiw-desc">Buy on Candle TV and hold at least 100 tokens in your Phantom wallet</div>
+      </div>
+      <div class="s-hiw-step reveal reveal-d2">
+        <div class="s-hiw-num">02</div>
+        <div class="s-hiw-title">Play the Arcade</div>
+        <div class="s-hiw-desc">Connect wallet, verify your balance, and get instant access to all 3 games</div>
+      </div>
+      <div class="s-hiw-step reveal reveal-d3">
+        <div class="s-hiw-num">03</div>
+        <div class="s-hiw-title">Win Prizes</div>
+        <div class="s-hiw-desc">Post your high score on X with $CHAD. Top 3 scores win every Sunday.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 4: ARCADE PREVIEW -->
+  <section class="s-arcade-prev">
+    <div class="s-arcade-inner">
+      <div class="s-section-label reveal">THE ARCADE</div>
+      <div class="s-arcade-grid">
+        <div class="s-acard reveal reveal-d1" onclick="handleEnterArcade()">
+          <div class="s-acard-thumb">🧔
+          </div>
+          <div class="s-acard-body">
+            <div class="s-acard-name">Flappy Beard</div>
+            <div class="s-acard-desc">Tap to flap through jeet candle obstacles</div>
+          </div>
+        </div>
+        <div class="s-acard reveal reveal-d2" onclick="handleEnterArcade()">
+          <div class="s-acard-thumb">💨
+          </div>
+          <div class="s-acard-body">
+            <div class="s-acard-name">Chad Dodge</div>
+            <div class="s-acard-desc">Dodge falling JEET blocks and catch green candles</div>
+          </div>
+        </div>
+        <div class="s-acard reveal reveal-d3" onclick="handleEnterArcade()">
+          <div class="s-acard-thumb">🌙
+          </div>
+          <div class="s-acard-body">
+            <div class="s-acard-name">Moon or Rug</div>
+            <div class="s-acard-desc">Reflex coin flip — pick before the timer runs out</div>
+          </div>
+        </div>
+      </div>
+      <div class="s-arcade-cta reveal">
+        <button class="btn-primary" id="arcade-cta-btn" onclick="handleEnterArcade()">ENTER USERNAME &amp; WALLET TO PLAY</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 5: HOW TO BUY -->
+  <section class="s-buy">
+    <div class="s-section-label reveal">GET $CHAD</div>
+    <div class="s-buy-steps">
+      <div class="s-buy-step reveal reveal-d1">
+        <div class="s-buy-num">1</div>
+        <div class="s-buy-title">Download Phantom</div>
+        <div class="s-buy-desc">Get the Phantom wallet at phantom.app — available for browser and mobile.</div>
+      </div>
+      <div class="s-buy-step reveal reveal-d2">
+        <div class="s-buy-num">2</div>
+        <div class="s-buy-title">Buy SOL</div>
+        <div class="s-buy-desc">Purchase Solana (SOL) on any major exchange and send it to your Phantom.</div>
+      </div>
+      <div class="s-buy-step reveal reveal-d3">
+        <div class="s-buy-num">3</div>
+        <div class="s-buy-title">Go to Candle.tv</div>
+        <div class="s-buy-desc">Visit candle.tv — the platform powering the $CHAD ecosystem.</div>
+      </div>
+      <div class="s-buy-step reveal reveal-d4">
+        <div class="s-buy-num">4</div>
+        <div class="s-buy-title">Swap for $CHAD</div>
+        <div class="s-buy-desc">Connect your wallet and swap SOL for $CHAD. Hold 100+ to unlock the arcade.</div>
+      </div>
+    </div>
+    <div class="s-buy-cta reveal">
+      <a class="btn-primary" href="https://candle.tv" target="_blank" style="text-decoration:none;">BUY ON CANDLE.TV →</a>
+    </div>
+  </section>
+
+  <!-- SECTION 6: FAQ -->
+  <section class="s-faq">
+    <div class="s-section-label reveal">FAQ</div>
+    <div class="faq2-list reveal">
+      <div class="faq2-item">
+        <div class="faq2-q" onclick="toggleFaq(this)">
+          <span class="faq2-q-text">What is $CHAD?</span>
+          <span class="faq2-icon">+</span>
+        </div>
+        <div class="faq2-a">$CHAD is a Solana memecoin built on Candle TV. Hold $CHAD to access the arcade, play 3 games, and compete for weekly prize pools paid directly in $CHAD.</div>
+      </div>
+      <div class="faq2-item">
+        <div class="faq2-q" onclick="toggleFaq(this)">
+          <span class="faq2-q-text">How do I play the arcade?</span>
+          <span class="faq2-icon">+</span>
+        </div>
+        <div class="faq2-a">Connect your Phantom wallet and hold at least 100 $CHAD. You'll get instant access to all 3 arcade games: Flappy Beard, Chad Dodge, and Moon or Rug.</div>
+      </div>
+      <div class="faq2-item">
+        <div class="faq2-q" onclick="toggleFaq(this)">
+          <span class="faq2-q-text">How do I win weekly prizes?</span>
+          <span class="faq2-icon">+</span>
+        </div>
+        <div class="faq2-a">Set a high score in any game, post it on X with $CHAD and #CHADArcade. Top 3 verified scores each week win $100, $50, and $25 in $CHAD sent to your wallet every Sunday.</div>
+      </div>
+      <div class="faq2-item">
+        <div class="faq2-q" onclick="toggleFaq(this)">
+          <span class="faq2-q-text">Is my wallet safe?</span>
+          <span class="faq2-icon">+</span>
+        </div>
+        <div class="faq2-a">Yes. Read-only connection only — we verify your $CHAD balance to check eligibility. We never request transaction signing and never access your funds.</div>
+      </div>
+      <div class="faq2-item">
+        <div class="faq2-q" onclick="toggleFaq(this)">
+          <span class="faq2-q-text">When are prizes sent?</span>
+          <span class="faq2-icon">+</span>
+        </div>
+        <div class="faq2-a">Every Sunday after the leaderboard resets at midnight UTC. $CHAD is sent directly to your connected Phantom wallet.</div>
+      </div>
+      <div class="faq2-item">
+        <div class="faq2-q" onclick="toggleFaq(this)">
+          <span class="faq2-q-text">What is the minimum to play?</span>
+          <span class="faq2-icon">+</span>
+        </div>
+        <div class="faq2-a">100 $CHAD minimum in your Phantom wallet. Your balance is checked each time you connect — no $CHAD, no arcade access.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 7: FOOTER -->
+  <footer class="s-footer">
+    <div class="s-footer-main">
+      <div class="s-footer-logo">$CHAD</div>
+      <div class="s-footer-built">BUILT ON SOLANA</div>
+      <div class="s-footer-links">
+        <a href="#" target="_blank" title="Twitter / X"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.743l7.727-8.813L1.254 2.25H8.08l4.259 5.63zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+        <a href="#" target="_blank" title="Telegram"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg></a>
+        <a href="https://candle.tv" target="_blank">CANDLE.TV</a>
+      </div>
+    </div>
+    <div class="s-footer-disc">Not financial advice. $CHAD is a memecoin. Never invest more than you can afford to lose.</div>
+  </footer>
+
+</div>
+
+
+<!-- ══ ARCADE SCREEN ══ -->
+<div id="screen-arcade" class="screen">
+  <div class="timer-bar">
+    <div>
+      <span class="timer-label">NEXT RESET</span>
+      <span class="timer-value" id="countdown-timer">--d --h --m --s</span>
+    </div>
+    <div class="prize-strip">🥇 $100 &nbsp;·&nbsp; 🥈 $50 &nbsp;·&nbsp; 🥉 $25 in $CHAD every Sunday</div>
+  </div>
+
+  <!-- GAME SELECT -->
+  <div class="select-section">
+    <!-- PROFILE CARD -->
+    <div class="profile-card">
+      <div class="profile-avatar">🧔</div>
+      <div class="profile-meta">
+        <div class="profile-wallet-addr" id="profile-wallet-addr"></div>
+        <div class="profile-joined" id="profile-joined"></div>
+        <div class="profile-stats-row">
+          <div class="profile-stat"><span id="profile-games">0</span><label>Games Played</label></div>
+          <div class="profile-stat"><span id="profile-best-flappy">0</span><label>Flappy Best</label></div>
+          <div class="profile-stat"><span id="profile-best-dodge">0</span><label>Dodge Best</label></div>
+          <div class="profile-stat"><span id="profile-best-moonrug">0</span><label>Moon/Rug Best</label></div>
+          <div class="profile-stat"><span id="profile-xposts">0</span><label>X Posts</label></div>
+        </div>
+      </div>
+    </div>
+    <div class="select-title">SELECT YOUR GAME</div>
+    <div class="games-grid">
+      <!-- FLAPPY BEARD -->
+      <div class="gcard" onclick="startGame('flappy')">
+        <div class="gcard-preview">
+          <div class="game-anim-flappy">
+            <div class="anim-bird">🧔</div>
+            <div class="anim-pipe top"></div>
+            <div class="anim-pipe bot"></div>
+          </div>
+        </div>
+        <div class="gcard-body">
+          <div class="gcard-num">Game 01</div>
+          <div class="gcard-title">Flappy Beard</div>
+          <div class="gcard-desc">Tap to flap through jeet candle obstacles. Gap narrows every 20 pts. Speed increases every 10.</div>
+          <div class="gcard-diff diff-med">MEDIUM</div>
+          <div class="gcard-scores">
+            <div class="gscore-item">Your Best<span class="user-score" id="hs-flappy">0</span></div>
+          </div>
+          <div class="gcard-foot"><button class="play-btn" onclick="event.stopPropagation();startGame('flappy')">PLAY →</button></div>
+        </div>
+      </div>
+      <!-- CHAD DODGE -->
+      <div class="gcard" onclick="startGame('dodge')">
+        <div class="gcard-preview">
+          <div class="game-anim-dodge">
+            <div style="position:absolute;top:15px;left:35%;font-size:18px;font-family:'DM Mono',monospace;font-weight:700;color:var(--red);animation:block-fall 1.8s linear infinite;">JEET</div>
+            <div style="position:absolute;top:15px;right:25%;font-size:22px;animation:block-fall 2.4s .6s linear infinite;">🕯️</div>
+            <div class="anim-chad">🧔</div>
+          </div>
+        </div>
+        <div class="gcard-body">
+          <div class="gcard-num">Game 02</div>
+          <div class="gcard-title">Chad Dodge</div>
+          <div class="gcard-desc">Survive falling JEET blocks &amp; red candles. Catch green candles for +50 pts. 3 lives.</div>
+          <div class="gcard-diff diff-easy">EASY START</div>
+          <div class="gcard-scores">
+            <div class="gscore-item">Your Best<span class="user-score" id="hs-dodge">0</span></div>
+          </div>
+          <div class="gcard-foot"><button class="play-btn" onclick="event.stopPropagation();startGame('dodge')">PLAY →</button></div>
+        </div>
+      </div>
+      <!-- MOON OR RUG -->
+      <div class="gcard" onclick="startGame('moonrug')">
+        <div class="gcard-preview">
+          <div class="game-anim-moon">
+            <div class="anim-coin">🪙</div>
+          </div>
+        </div>
+        <div class="gcard-body">
+          <div class="gcard-num">Game 03</div>
+          <div class="gcard-title">Moon or Rug</div>
+          <div class="gcard-desc">Spinning coin reflex game. Pick MOON or RUG before time runs out. Streaks earn bonuses.</div>
+          <div class="gcard-diff diff-hard">HARD</div>
+          <div class="gcard-scores">
+            <div class="gscore-item">Your Best<span class="user-score" id="hs-moonrug">0</span></div>
+          </div>
+          <div class="gcard-foot"><button class="play-btn" onclick="event.stopPropagation();startGame('moonrug')">PLAY →</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- YOUR STATS -->
+    <div class="your-stats">
+      <div class="your-stats-title">YOUR STATS</div>
+      <div class="your-stat"><span class="your-stat-val" id="stat-games">0</span><span class="your-stat-lbl">Games Played</span></div>
+      <div class="your-stat"><span class="your-stat-val" id="stat-best">0</span><span class="your-stat-lbl">All-Time Best</span></div>
+      <div class="your-stat"><span class="your-stat-val" id="stat-rank">#--</span><span class="your-stat-lbl">Current Rank</span></div>
+    </div>
+
+    <!-- LEADERBOARD PREVIEW -->
+    <div class="lb-preview">
+      <div class="lb-preview-title">THIS WEEK'S TOP CHADS</div>
+      <div id="lb-preview-rows"></div>
+      <button class="view-lb-btn" onclick="showLeaderboard()">VIEW FULL LEADERBOARD →</button>
+    </div>
+  </div>
+
+  <footer>
+    <div class="f-logo">$CHAD</div>
+    <p class="f-disc">$CHAD is a memecoin on Solana. Not financial advice. Play responsibly.</p>
+    <div class="f-links"><a href="#" target="_blank">Twitter</a><a href="#" target="_blank">Telegram</a><a href="https://candle.tv" target="_blank">Candle.tv</a></div>
+  </footer>
+</div>
+
+<!-- ══ GAME SCREEN ══ -->
+<div id="screen-game" class="screen">
+  <div class="canvas-wrap">
+    <canvas id="gc"></canvas>
+  </div>
+</div>
+
+<!-- ══ GAME OVER ══ -->
+<div id="screen-gameover" class="screen">
+  <div class="receipt">
+    <div class="r-logo">$CHAD ARCADE</div>
+    <div class="r-sub" id="go-game-name">FLAPPY BEARD</div>
+    <hr class="r-divider">
+    <div class="r-row"><span>WALLET</span><span id="go-wallet">ANON</span></div>
+    <div class="r-row"><span>DATE</span><span id="go-date"></span></div>
+    <div class="r-row bold"><span>SESSION BEST</span><span id="go-best">0</span></div>
+    <hr class="r-divider">
+    <div class="r-score-lbl">FINAL SCORE</div>
+    <div class="r-score" id="go-score">0</div>
+    <hr class="r-divider">
+    <div class="r-barcode">
+      <svg viewBox="0 0 150 30"><rect x="0" y="0" width="2" height="24" fill="#222"/><rect x="4" y="0" width="1" height="24" fill="#222"/><rect x="7" y="0" width="3" height="24" fill="#222"/><rect x="12" y="0" width="1" height="24" fill="#222"/><rect x="15" y="0" width="2" height="24" fill="#222"/><rect x="19" y="0" width="4" height="24" fill="#222"/><rect x="25" y="0" width="1" height="24" fill="#222"/><rect x="28" y="0" width="3" height="24" fill="#222"/><rect x="33" y="0" width="2" height="24" fill="#222"/><rect x="37" y="0" width="1" height="24" fill="#222"/><rect x="41" y="0" width="4" height="24" fill="#222"/><rect x="47" y="0" width="2" height="24" fill="#222"/><rect x="51" y="0" width="1" height="24" fill="#222"/><rect x="54" y="0" width="3" height="24" fill="#222"/><rect x="59" y="0" width="2" height="24" fill="#222"/><rect x="63" y="0" width="1" height="24" fill="#222"/><rect x="67" y="0" width="4" height="24" fill="#222"/><rect x="73" y="0" width="2" height="24" fill="#222"/><rect x="77" y="0" width="1" height="24" fill="#222"/><rect x="80" y="0" width="3" height="24" fill="#222"/><rect x="85" y="0" width="2" height="24" fill="#222"/><rect x="89" y="0" width="4" height="24" fill="#222"/><rect x="95" y="0" width="1" height="24" fill="#222"/><rect x="98" y="0" width="3" height="24" fill="#222"/><rect x="103" y="0" width="2" height="24" fill="#222"/><rect x="107" y="0" width="1" height="24" fill="#222"/><rect x="111" y="0" width="4" height="24" fill="#222"/><rect x="117" y="0" width="2" height="24" fill="#222"/><rect x="121" y="0" width="1" height="24" fill="#222"/><rect x="124" y="0" width="3" height="24" fill="#222"/><rect x="129" y="0" width="2" height="24" fill="#222"/><rect x="133" y="0" width="1" height="24" fill="#222"/><rect x="137" y="0" width="4" height="24" fill="#222"/><rect x="143" y="0" width="2" height="24" fill="#222"/><rect x="147" y="0" width="3" height="24" fill="#222"/><text x="75" y="30" text-anchor="middle" font-family="monospace" font-size="7" fill="#888">$CHAD-ARCADE-2026</text></svg>
+    </div>
+    <div class="r-powered">powered by candle.tv</div>
+    <div class="r-weekly">📢 Post your score on X with <strong>$CHAD #CHADArcade</strong><br>Top 3 scores with verified X posts win<br><strong>$CHAD airdrop every Sunday</strong></div>
+  </div>
+  <div class="go-btns">
+    <a class="share-btn" id="go-share" href="#" target="_blank">
+      <span style="font-weight:900;font-size:15px;">𝕏</span> Share Score
+    </a>
+    <button class="retry-btn" id="go-retry">Play Again</button>
+    <button class="menu-btn2" onclick="showArcade()">← Arcade</button>
+  </div>
+  <div style="margin-top:12px;">
+    <button class="mark-posted-btn" id="mark-posted-btn" onclick="markPosted()">✓ Mark as Posted on X</button>
+  </div>
+</div>
+
+<!-- ══ LEADERBOARD SCREEN ══ -->
+<div id="screen-leaderboard" class="screen">
+  <div class="lb-page-title">HALL OF CHADS</div>
+  <div class="lb-page-sub">WEEKLY LEADERBOARD · PRIZES EVERY SUNDAY</div>
+  <div class="lb-timer-wrap">
+    <span class="timer-label">NEXT RESET: </span>
+    <span class="timer-value" id="lb-countdown">--d --h --m --s</span>
+  </div>
+  <div class="lb-prize-break">
+    <div class="lb-prize-item"><span class="lb-prize-medal">🥇</span><span class="lb-prize-val">$100</span><span class="lb-prize-lbl">in $CHAD</span></div>
+    <div class="lb-prize-item"><span class="lb-prize-medal">🥈</span><span class="lb-prize-val">$50</span><span class="lb-prize-lbl">in $CHAD</span></div>
+    <div class="lb-prize-item"><span class="lb-prize-medal">🥉</span><span class="lb-prize-val">$25</span><span class="lb-prize-lbl">in $CHAD</span></div>
+  </div>
+  <div class="lb-notice">
+    <strong>To be eligible for weekly prizes</strong> you must post your high score on X with <strong>$CHAD</strong> and <strong>#CHADArcade</strong> tags. Winners verified manually every Sunday and $CHAD sent to your connected wallet. <strong>One prize per wallet per week.</strong>
+  </div>
+
+  <!-- HOW TO WIN -->
+  <div class="htw-section">
+    <div class="htw-title">HOW TO WIN PRIZES</div>
+    <div class="htw-step"><div class="htw-num">1</div><div class="htw-text">Set a high score in any game</div></div>
+    <div class="htw-step"><div class="htw-num">2</div><div class="htw-text">Click <strong style="color:var(--green);">Share on X</strong> on the score card — pre-fills the tweet for you</div></div>
+    <div class="htw-step"><div class="htw-num">3</div><div class="htw-text">Actually post the tweet on X (don't just draft it)</div></div>
+    <div class="htw-step"><div class="htw-num">4</div><div class="htw-text">Click <strong style="color:var(--green);">Mark as Posted on X</strong> in the arcade score card</div></div>
+    <div class="htw-step"><div class="htw-num">5</div><div class="htw-text">Winners announced every Sunday — $CHAD sent directly to your connected wallet</div></div>
+    <div class="htw-note">Top 3 scores with verified X posts win. One prize per wallet per week. Scores reset Sunday midnight UTC.</div>
+  </div>
+
+  <div style="display:flex;gap:12px;margin-bottom:20px;align-items:center;flex-wrap:wrap;">
+    <div class="lb-tabs">
+      <button class="lb-tab active" onclick="setLbTab('all',this)">All Games</button>
+      <button class="lb-tab" onclick="setLbTab('flappy',this)">Flappy Beard</button>
+      <button class="lb-tab" onclick="setLbTab('dodge',this)">Chad Dodge</button>
+      <button class="lb-tab" onclick="setLbTab('moonrug',this)">Moon or Rug</button>
+    </div>
+    <div class="lb-toggle">
+      <button class="lb-tog-btn active" id="tog-week" onclick="setLbPeriod('week',this)">This Week</button>
+      <button class="lb-tog-btn" id="tog-alltime" onclick="setLbPeriod('alltime',this)">All Time</button>
+    </div>
+  </div>
+
+  <table class="lb-table" id="lb-table">
+    <thead><tr><th>#</th><th></th><th>Wallet</th><th>Score</th><th>Game</th><th>Date</th><th>X Post</th></tr></thead>
+    <tbody id="lb-tbody"></tbody>
+  </table>
+
+  <div style="text-align:center;margin-bottom:40px;">
+    <button class="menu-btn2" onclick="showArcade()">← Back to Arcade</button>
+  </div>
+
+  <footer>
+    <div class="f-logo">$CHAD</div>
+    <p class="f-disc">$CHAD is a memecoin on Solana. Not financial advice.</p>
+    <div class="f-links"><a href="#" target="_blank">Twitter</a><a href="https://candle.tv" target="_blank">Candle.tv</a></div>
+  </footer>
+</div>
+
+<!-- ══ LOGIN MODAL ══ -->
+<div id="login-modal" class="login-overlay">
+  <div class="login-box">
+    <div class="login-title">ENTER THE ARCADE</div>
+    <div class="login-sub">Enter your details to play and compete for weekly prizes</div>
+    <div class="login-field">
+      <label>X USERNAME</label>
+      <input type="text" id="input-x" placeholder="@yourhandle" autocomplete="off">
+    </div>
+    <div class="login-field">
+      <label>SOLANA WALLET ADDRESS</label>
+      <input type="text" id="input-wallet" placeholder="Your Solana wallet address" autocomplete="off">
+    </div>
+    <div class="login-error hidden" id="login-error"></div>
+    <button class="login-submit-btn" onclick="submitLogin()">ENTER ARCADE →</button>
+    <button class="login-cancel" onclick="closeLoginModal()">CANCEL</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// CONSTANTS
+// ══════════════════════════════════════════
+const SITE = 'https://chadcandle.xyz';
+
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let xUsername = null;
+let walletAddress = null;
+let currentGame = null;
+let raf = null;
+let bests = {flappy:0, dodge:0, moonrug:0};
+let gamesPlayed = 0;
+let currentLbTab = 'all';
+let currentLbPeriod = 'week';
+let lastGameKey = null;
+let lastGameScore = 0;
+let lastGameName = '';
+
+// ══════════════════════════════════════════
+// AUTH / LOGIN
+// ══════════════════════════════════════════
+function truncate(addr){return addr.slice(0,4)+'...'+addr.slice(-4);}
+
+function showLoginModal(){
+  document.getElementById('login-modal').classList.add('open');
+}
+
+function closeLoginModal(){
+  document.getElementById('login-modal').classList.remove('open');
+}
+
+function submitLogin(){
+  const x = document.getElementById('input-x').value.trim();
+  const w = document.getElementById('input-wallet').value.trim();
+  const err = document.getElementById('login-error');
+
+  if(!x){
+    err.textContent = 'X username is required.';
+    err.classList.remove('hidden');
+    return;
+  }
+  if(!w){
+    err.textContent = 'Solana wallet address is required.';
+    err.classList.remove('hidden');
+    return;
+  }
+  // Basic Solana address validation (32-44 chars, base58)
+  if(w.length < 32 || w.length > 44){
+    err.textContent = 'Please enter a valid Solana wallet address.';
+    err.classList.remove('hidden');
+    return;
+  }
+
+  err.classList.add('hidden');
+  xUsername = x.startsWith('@') ? x : '@' + x;
+  walletAddress = w;
+
+  closeLoginModal();
+  onUserLoggedIn();
+}
+
+function onUserLoggedIn(){
+  // Update nav
+  const pill = document.getElementById('nav-user-pill');
+  const pillName = document.getElementById('nav-user-name');
+  if(pill) pill.classList.add('show');
+  if(pillName) pillName.textContent = xUsername;
+
+  document.getElementById('nav-connect-btn').classList.add('hidden');
+  document.getElementById('nav-logout-btn').classList.remove('hidden');
+
+  // Update arcade CTA
+  const ctaBtn = document.getElementById('arcade-cta-btn');
+  if(ctaBtn) ctaBtn.textContent = 'ENTER ARCADE →';
+
+  getOrCreateProfile(walletAddress);
+  loadBests();
+  showArcade();
+}
+
+function logoutUser(){
+  xUsername = null;
+  walletAddress = null;
+
+  const pill = document.getElementById('nav-user-pill');
+  if(pill) pill.classList.remove('show');
+  document.getElementById('nav-connect-btn').classList.remove('hidden');
+  document.getElementById('nav-logout-btn').classList.add('hidden');
+
+  const ctaBtn = document.getElementById('arcade-cta-btn');
+  if(ctaBtn) ctaBtn.textContent = 'ENTER USERNAME & WALLET TO PLAY';
+
+  goHome();
+  stopLoop();
+}
+
+function handleEnterArcade(){
+  if(xUsername && walletAddress){
+    showArcade();
+  } else {
+    showLoginModal();
+  }
+}
+
+window.addEventListener('load', ()=>{
+  spawnParticles();
+  startCountdown();
+  initStatementReveal();
+  initScrollReveal();
+});
+
+// ══════════════════════════════════════════
+// HERO PARTICLES
+// ══════════════════════════════════════════
+function spawnParticles(){
+  const container = document.getElementById('hero-particles');
+  if(!container) return;
+  for(let i=0;i<70;i++){
+    const el = document.createElement('div');
+    el.className = 's-hero-dot';
+    const size = Math.random()*2.5+0.8;
+    const opacity = (Math.random()*0.35+0.08).toFixed(2);
+    el.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;background:rgba(0,229,84,${opacity});animation-duration:${9+Math.random()*14}s;animation-delay:${Math.random()*14}s;`;
+    container.appendChild(el);
+  }
+}
+
+// ══════════════════════════════════════════
+// COUNTDOWN
+// ══════════════════════════════════════════
+function getNextSunday(){
+  const now = new Date();
+  const d = new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate(),0,0,0));
+  const day = d.getUTCDay();
+  const diff = day === 0 ? 7 : 7 - day;
+  d.setUTCDate(d.getUTCDate()+diff);
+  return d;
+}
+
+function startCountdown(){
+  function tick(){
+    const now = new Date();
+    const target = getNextSunday();
+    const diff = target - now;
+    if(diff <= 0){ tick(); return; }
+    const days = Math.floor(diff/86400000);
+    const hrs = Math.floor((diff%86400000)/3600000);
+    const mins = Math.floor((diff%3600000)/60000);
+    const secs = Math.floor((diff%60000)/1000);
+    const str = `${days}d ${hrs}h ${mins}m ${secs}s`;
+    const t1 = document.getElementById('countdown-timer');
+    const t2 = document.getElementById('lb-countdown');
+    if(t1) t1.textContent = str;
+    if(t2) t2.textContent = str;
+  }
+  tick();
+  setInterval(tick, 1000);
+}
+
+// ══════════════════════════════════════════
+// WALLET PROFILES
+// ══════════════════════════════════════════
+function getOrCreateProfile(wallet){
+  const key = 'chad_profile_'+wallet;
+  let p = JSON.parse(localStorage.getItem(key)||'null');
+  if(!p){
+    p = {wallet, dateJoined: new Date().toISOString().slice(0,10)};
+    localStorage.setItem(key, JSON.stringify(p));
+  }
+  return p;
+}
+
+function renderProfileCard(){
+  if(!walletAddress) return;
+  const p = getOrCreateProfile(walletAddress);
+  document.getElementById('profile-wallet-addr').textContent = xUsername || truncate(walletAddress);
+  document.getElementById('profile-joined').textContent = truncate(walletAddress);
+  document.getElementById('profile-games').textContent = gamesPlayed;
+  document.getElementById('profile-best-flappy').textContent = bests.flappy||0;
+  document.getElementById('profile-best-dodge').textContent = bests.dodge||0;
+  document.getElementById('profile-best-moonrug').textContent = bests.moonrug||0;
+  const list = JSON.parse(localStorage.getItem(lsScoreListKey())||'[]');
+  document.getElementById('profile-xposts').textContent = list.filter(e=>e.xPosted).length;
+}
+
+// ══════════════════════════════════════════
+// SCREENS
+// ══════════════════════════════════════════
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goHome(){
+  stopLoop(); clearInputs();
+  showScreen('screen-hero');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function showArcade(){
+  stopLoop(); clearInputs();
+  loadBests(); updateStats(); renderLbPreview(); renderProfileCard();
+  showScreen('screen-arcade');
+}
+
+function showLeaderboard(){
+  renderLeaderboard();
+  showScreen('screen-leaderboard');
+}
+
+// ══════════════════════════════════════════
+// SCORES / LOCAL STORAGE
+// ══════════════════════════════════════════
+function lsKey(game){ return 'chad_b_'+game+(walletAddress?'_'+walletAddress:''); }
+function lsGamesKey(){ return 'chad_games'+(walletAddress?'_'+walletAddress:''); }
+function lsScoreListKey(){ return 'chad_scores'+(walletAddress?'_'+walletAddress:''); }
+function lsPostedKey(game,score){ return 'chad_posted_'+game+'_'+score+(walletAddress?'_'+walletAddress:''); }
+
+function loadBests(){
+  for(const g of ['flappy','dodge','moonrug']){
+    bests[g] = parseInt(localStorage.getItem(lsKey(g))||'0');
+    const el = document.getElementById('hs-'+g);
+    if(el) el.textContent = bests[g];
+  }
+  gamesPlayed = parseInt(localStorage.getItem(lsGamesKey())||'0');
+}
+
+function saveBest(game,score){
+  if(score > bests[game]){
+    bests[game] = score;
+    localStorage.setItem(lsKey(game), score);
+    const el = document.getElementById('hs-'+game);
+    if(el) el.textContent = score;
+  }
+  // Increment games played
+  gamesPlayed++;
+  localStorage.setItem(lsGamesKey(), gamesPlayed);
+  // Save to score list
+  const list = JSON.parse(localStorage.getItem(lsScoreListKey())||'[]');
+  list.push({game, score, date: new Date().toISOString().slice(0,10), wallet: xUsername || (walletAddress ? truncate(walletAddress) : 'You'), xPosted:false});
+  localStorage.setItem(lsScoreListKey(), JSON.stringify(list));
+}
+
+function markPosted(){
+  const btn = document.getElementById('mark-posted-btn');
+  if(btn.classList.contains('posted')) return;
+  const list = JSON.parse(localStorage.getItem(lsScoreListKey())||'[]');
+  for(let i=list.length-1;i>=0;i--){
+    if(list[i].game===lastGameKey && list[i].score===lastGameScore){
+      list[i].xPosted=true; break;
+    }
+  }
+  localStorage.setItem(lsScoreListKey(), JSON.stringify(list));
+  btn.textContent = '✓ Posted on X!';
+  btn.classList.add('posted');
+  renderProfileCard();
+}
+
+function updateStats(){
+  loadBests();
+  const allBest = Math.max(bests.flappy, bests.dodge, bests.moonrug);
+  document.getElementById('stat-games').textContent = gamesPlayed;
+  document.getElementById('stat-best').textContent = allBest;
+  document.getElementById('stat-rank').textContent = gamesPlayed > 0 ? '#1' : '#--';
+}
+
+function getUserScores(){
+  return JSON.parse(localStorage.getItem(lsScoreListKey())||'[]').map(e=>({...e,isMe:true}));
+}
+
+function getMergedScores(tab, period){
+  let combined = getUserScores();
+  if(tab !== 'all') combined = combined.filter(e=>e.game===tab);
+  combined.sort((a,b)=>b.score-a.score);
+  return combined.slice(0,20);
+}
+
+// ══════════════════════════════════════════
+// LEADERBOARD RENDER
+// ══════════════════════════════════════════
+function setLbTab(tab, el){
+  currentLbTab = tab;
+  document.querySelectorAll('.lb-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderLeaderboard();
+}
+
+function setLbPeriod(period, el){
+  currentLbPeriod = period;
+  document.querySelectorAll('.lb-tog-btn').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderLeaderboard();
+}
+
+function renderLeaderboard(){
+  const rows = getMergedScores(currentLbTab, currentLbPeriod);
+  const medals = ['🥇','🥈','🥉'];
+  const gameNames = {flappy:'Flappy Beard',dodge:'Chad Dodge',moonrug:'Moon or Rug'};
+  const tbody = document.getElementById('lb-tbody');
+  tbody.innerHTML = rows.map((r,i)=>`
+    <tr class="${r.isMe?'me':''}">
+      <td>${i+1}</td>
+      <td>${i<3?medals[i]:''}</td>
+      <td>${r.wallet}</td>
+      <td style="color:var(--gold);font-weight:700;">${r.score}</td>
+      <td style="color:var(--muted2);font-size:9px;">${gameNames[r.game]||r.game}</td>
+      <td style="color:var(--muted2);">${r.date||''}</td>
+      <td><span class="lb-xbadge ${r.xPosted?'yes':'no'}">${r.xPosted?'✓ X POST':'—'}</span></td>
+    </tr>`).join('');
+}
+
+function renderLbPreview(){
+  const rows = getMergedScores('all','week').slice(0,5);
+  const medals = ['🥇','🥈','🥉'];
+  const gameNames = {flappy:'Flappy',dodge:'Dodge',moonrug:'Moon/Rug'};
+  document.getElementById('lb-preview-rows').innerHTML = rows.map((r,i)=>`
+    <div class="lb-row">
+      <span class="lb-rank">${i+1}</span>
+      <span class="lb-medal">${i<3?medals[i]:''}</span>
+      <span class="lb-wallet ${r.isMe?'me':''}">${r.wallet}</span>
+      <span class="lb-game">${gameNames[r.game]||r.game}</span>
+      <span class="lb-score">${r.score}</span>
+      <span class="lb-xpost ${r.xPosted?'':'no'}">${r.xPosted?'✓':'—'}</span>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════
+// GAME ENGINE
+// ══════════════════════════════════════════
+const GW = 420, GH = 560;
+const canvas = document.getElementById('gc');
+const ctx = canvas.getContext('2d');
+canvas.width = GW; canvas.height = GH;
+
+function startGame(game){
+  currentGame = game; lastGameKey = game;
+  showScreen('screen-game');
+  stopLoop(); clearInputs();
+  if(game==='flappy') initFlappy();
+  else if(game==='dodge') initDodge();
+  else if(game==='moonrug') initMoonRug();
+  startLoop();
+}
+
+function stopLoop(){ if(raf){ cancelAnimationFrame(raf); raf=null; } }
+
+let lastTs = 0;
+function startLoop(){
+  lastTs = performance.now();
+  function tick(ts){
+    const dt = Math.min((ts-lastTs)/16.667,3);
+    lastTs = ts;
+    if(currentGame==='flappy') tickFlappy(dt);
+    else if(currentGame==='dodge') tickDodge(dt);
+    else if(currentGame==='moonrug') tickMoonRug(dt);
+    raf = requestAnimationFrame(tick);
+  }
+  raf = requestAnimationFrame(tick);
+}
+
+function clearInputs(){
+  document.onkeydown = null;
+  document.onkeyup = null;
+  canvas.onclick = null;
+  canvas.ontouchstart = null;
+  canvas.ontouchmove = null;
+}
+
+function gameOver(score, gameName, gameKey){
+  stopLoop(); clearInputs();
+  lastGameScore = score; lastGameName = gameName; lastGameKey = gameKey;
+  saveBest(gameKey, score);
+  document.getElementById('go-game-name').textContent = gameName.toUpperCase();
+  document.getElementById('go-score').textContent = score;
+  document.getElementById('go-best').textContent = bests[gameKey];
+  document.getElementById('go-date').textContent = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}).toUpperCase();
+  document.getElementById('go-wallet').textContent = xUsername || (walletAddress ? truncate(walletAddress) : 'ANON');
+  const tweets = {
+    flappy:`Just scored ${score} on Flappy Beard in the $CHAD Arcade 🎮 Can you beat me? Play at ${SITE} $CHAD #CHADArcade`,
+    dodge:`I survived ${score} seconds in Chad Dodge on the $CHAD Arcade 🛡️ Try to beat me. Play at ${SITE} $CHAD #CHADArcade`,
+    moonrug:`Called ${score} in a row on Moon or Rug in the $CHAD Arcade 🌕 I am built different. Play at ${SITE} $CHAD #CHADArcade`,
+  };
+  document.getElementById('go-share').href = 'https://twitter.com/intent/tweet?text='+encodeURIComponent(tweets[gameKey]||tweets.flappy);
+  document.getElementById('go-retry').onclick = ()=>startGame(gameKey);
+  const postBtn = document.getElementById('mark-posted-btn');
+  postBtn.textContent = '✓ Mark as Posted on X';
+  postBtn.classList.remove('posted');
+  setTimeout(()=>showScreen('screen-gameover'), 700);
+}
+
+// ── PARTICLES ──
+let parts = [];
+function pSpawn(x,y,col,n,spd=3){
+  for(let i=0;i<n;i++){
+    const a=Math.random()*Math.PI*2, s=Math.random()*spd+1;
+    parts.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-1.5,life:1,decay:Math.random()*.045+.025,r:Math.random()*3+1,col});
+  }
+}
+function pUpdate(dt){ for(let i=parts.length-1;i>=0;i--){ const p=parts[i]; p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=.13*dt;p.life-=p.decay*dt; if(p.life<=0) parts.splice(i,1); } }
+function pDraw(){ parts.forEach(p=>{ ctx.save();ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.col;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();ctx.restore(); }); }
+
+// ── SHARED DRAW ──
+function drawBg(){
+  const g=ctx.createLinearGradient(0,0,0,GH);
+  g.addColorStop(0,'#040d07');g.addColorStop(1,'#061208');
+  ctx.fillStyle=g;ctx.fillRect(0,0,GW,GH);
+  // Subtle grid
+  ctx.strokeStyle='rgba(0,229,84,.03)';ctx.lineWidth=1;
+  for(let x=0;x<GW;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,GH);ctx.stroke();}
+  for(let y=0;y<GH;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(GW,y);ctx.stroke();}
+}
+
+function rrect(x,y,w,h,r){
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath();
+}
+
+function drawChad(x,y,r,rot){
+  ctx.save();ctx.translate(x,y);if(rot)ctx.rotate(rot);
+  const hg=ctx.createRadialGradient(-r*.25,-r*.28,r*.08,0,0,r);
+  hg.addColorStop(0,'#ffe0a0');hg.addColorStop(1,'#d4a017');
+  ctx.fillStyle=hg;ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#b8860b';ctx.lineWidth=1.5;ctx.stroke();
+  ctx.fillStyle='#06100a';ctx.beginPath();ctx.arc(-r*.36,-r*.22,r*.2,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(r*.32,-r*.22,r*.2,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(-r*.28,-r*.30,r*.08,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(r*.40,-r*.30,r*.08,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#ff8c00';ctx.beginPath();ctx.moveTo(0,-r*.05);ctx.lineTo(r*.62,r*.04);ctx.lineTo(0,r*.18);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#5a3008';ctx.beginPath();ctx.ellipse(0,r*.64,r*.82,r*.6,0,0,Math.PI);ctx.fill();
+  ctx.strokeStyle='#3d1f04';ctx.lineWidth=1.6;ctx.lineCap='round';
+  [[-0.45,0.54,-0.36,1.1],[-0.22,0.62,-0.18,1.18],[0,0.66,0,1.2],[0.22,0.62,0.18,1.18],[0.45,0.54,0.36,1.1]].forEach(([x1,y1,x2,y2])=>{
+    ctx.beginPath();ctx.moveTo(x1*r,y1*r);ctx.quadraticCurveTo(x1*1.1*r,(y1+y2)/2*r,x2*r,y2*r);ctx.stroke();
+  });
+  ctx.fillStyle='#6b3a0a';
+  ctx.beginPath();ctx.ellipse(-r*.22,r*.22,r*.3,r*.16,-0.2,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.ellipse(r*.22,r*.22,r*.3,r*.16,0.2,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+}
+
+function drawCoin(x,y,r,angle){
+  ctx.save();ctx.translate(x,y);
+  const sx=Math.cos(angle);ctx.scale(Math.abs(sx)<.04?.04:sx,1);
+  const gl=ctx.createRadialGradient(0,0,0,0,0,r+12);
+  gl.addColorStop(0,'rgba(245,197,24,.35)');gl.addColorStop(1,'rgba(245,197,24,0)');
+  ctx.fillStyle=gl;ctx.beginPath();ctx.arc(0,0,r+12,0,Math.PI*2);ctx.fill();
+  const cg=ctx.createRadialGradient(-r*.3,-r*.3,r*.1,0,0,r);
+  cg.addColorStop(0,'#fff4b0');cg.addColorStop(.6,'#f5c518');cg.addColorStop(1,'#a07800');
+  ctx.fillStyle=cg;ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#a07800';ctx.lineWidth=2;ctx.stroke();
+  ctx.fillStyle='rgba(120,80,0,.8)';ctx.font=`bold ${Math.floor(r*.85)}px "Bebas Neue",sans-serif`;
+  ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('$',0,2);
+  ctx.restore();
+}
+
+function drawStars(stars,frame){
+  stars.forEach(s=>{
+    ctx.save();ctx.globalAlpha=(Math.sin(s.a+frame*s.spd)*.5+.5)*.55+.08;
+    ctx.fillStyle='#00ff5e';ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fill();ctx.restore();
+  });
+}
+
+function makeStars(n){
+  return Array.from({length:n},()=>({x:Math.random()*GW,y:Math.random()*GH,r:Math.random()*1.5+.3,a:Math.random()*Math.PI*2,spd:Math.random()*.01+.005}));
+}
+
+function drawIdleOverlay(title,sub,frame){
+  ctx.fillStyle='rgba(6,16,10,.62)';ctx.fillRect(0,0,GW,GH);
+  ctx.save();ctx.textAlign='center';
+  ctx.font='bold 50px "Bebas Neue",sans-serif';ctx.fillStyle='#00ff5e';ctx.shadowColor='#00ff5e';ctx.shadowBlur=20;
+  ctx.fillText(title,GW/2,GH/2-64);ctx.shadowBlur=0;
+  ctx.font='400 10px "DM Mono",monospace';ctx.fillStyle='rgba(255,255,255,.5)';
+  ctx.fillText(sub,GW/2,GH/2-38);
+  ctx.globalAlpha=Math.sin(frame*.065)*.4+.6;
+  ctx.font='700 13px "DM Mono",monospace';ctx.fillStyle='#00ff5e';
+  ctx.fillText('TAP / SPACE TO START',GW/2,GH/2+22);ctx.restore();
+}
+
+function drawScore(score,x,y){
+  ctx.save();ctx.textAlign='center';
+  ctx.fillStyle='rgba(0,0,0,.4)';ctx.font='bold 38px "Bebas Neue",sans-serif';ctx.fillText(score,x+2,y+2);
+  ctx.fillStyle='#fff';ctx.fillText(score,x,y);ctx.restore();
+}
+
+// ══════════════════════════════════════════
+// GAME 1 — FLAPPY BEARD
+// ══════════════════════════════════════════
+const FB = {};
+
+function initFlappy(){
+  parts=[];
+  Object.assign(FB,{st:'idle',score:0,frame:0,bird:{y:GH/2,vy:0,rot:0},pipes:[],pTimer:0,speed:1,stars:makeStars(48),flashRed:0});
+  canvas.onclick=()=>fbFlap();
+  canvas.ontouchstart=e=>{e.preventDefault();fbFlap();};
+  document.onkeydown=e=>{if(['Space','ArrowUp'].includes(e.code)){e.preventDefault();fbFlap();}};
+}
+
+function fbFlap(){
+  if(FB.st==='idle'){FB.st='playing';FB.bird.vy=-9.5;}
+  else if(FB.st==='playing'){FB.bird.vy=-9.5;pSpawn(82,FB.bird.y,'#00ff5e',5);}
+}
+
+function tickFlappy(dt){
+  FB.frame++;pUpdate(dt);
+  if(FB.flashRed>0) FB.flashRed-=dt;
+  if(FB.st!=='playing'){drawFlappy();return;}
+  FB.speed=1+Math.floor(FB.score/10)*0.22;
+  const sp=FB.speed*dt;
+  FB.bird.vy+=.46*dt;FB.bird.y+=FB.bird.vy*dt;
+  FB.bird.rot=Math.min(Math.PI*.42,Math.max(-.45,FB.bird.vy*.065));
+  if(FB.bird.y-22<0){FB.bird.y=22;FB.bird.vy=2;}
+  if(FB.bird.y+22>GH-26){fbDie();return;}
+  FB.pTimer+=dt;
+  const gap=Math.max(110,152-Math.floor(FB.score/20)*8);
+  if(FB.pTimer>=88){FB.pTimer=0;const gapY=75+Math.random()*(GH-gap-110);FB.pipes.push({x:GW+62,gapY,gap,scored:false});}
+  for(let i=FB.pipes.length-1;i>=0;i--){
+    const p=FB.pipes[i];p.x-=2.9*sp;
+    if(!p.scored&&p.x+62<82-22){p.scored=true;FB.score++;pSpawn(82,FB.bird.y,'#f5c518',10);}
+    if(82+22>p.x+4&&82-22<p.x+62){if(FB.bird.y-22<p.gapY||FB.bird.y+22>p.gapY+p.gap){fbDie();return;}}
+    if(p.x+62<-20) FB.pipes.splice(i,1);
+  }
+  drawFlappy();
+}
+
+function fbDie(){
+  FB.st='dead';FB.flashRed=15;
+  pSpawn(82,FB.bird.y,'#ff3a3a',20);pSpawn(82,FB.bird.y,'#f5c518',10);
+  gameOver(FB.score,'Flappy Beard','flappy');
+}
+
+function drawFlappy(){
+  drawBg();drawStars(FB.stars,FB.frame);
+  FB.pipes.forEach(p=>drawJeetPipe(p.x,p.gapY,p.gap));
+  ctx.fillStyle='#0a2010';ctx.fillRect(0,GH-26,GW,26);
+  ctx.strokeStyle='rgba(0,229,84,.2)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(0,GH-26);ctx.lineTo(GW,GH-26);ctx.stroke();
+  pDraw();drawChad(82,FB.bird.y,22,FB.bird.rot);
+  if(FB.st!=='idle') drawScore(FB.score,GW/2,54);
+  if(FB.st==='idle') drawIdleOverlay('FLAPPY BEARD','CANDLE TV EDITION',FB.frame);
+  // Red flash on death
+  if(FB.flashRed>0){ctx.fillStyle=`rgba(255,0,0,${Math.min(.6,FB.flashRed/8)})`;ctx.fillRect(0,0,GW,GH);}
+  if(FB.st==='dead'&&FB.flashRed>5){
+    ctx.save();ctx.textAlign='center';ctx.font='bold 80px "Bebas Neue",sans-serif';
+    ctx.fillStyle='#ff3a3a';ctx.shadowColor='#ff3a3a';ctx.shadowBlur=30;ctx.fillText('REKT',GW/2,GH/2);ctx.restore();
+  }
+}
+
+function drawJeetPipe(x,gapY,gap){
+  const w=62;
+  drawCoinStack(x,0,w,gapY,true);
+  drawCoinStack(x,gapY+gap,w,GH-(gapY+gap)-26,false);
+  ctx.save();ctx.textAlign='center';ctx.font='bold 10px "DM Mono",monospace';ctx.fillStyle='#ff4444';
+  if(gapY>14) ctx.fillText('JEET',x+w/2,gapY-6);
+  ctx.fillText('JEET',x+w/2,gapY+gap+14);ctx.restore();
+}
+
+function drawCoinStack(x,y,w,h,fromTop){
+  if(h<=0)return;
+  const grad=ctx.createLinearGradient(x,0,x+w,0);
+  grad.addColorStop(0,'#1a1200');grad.addColorStop(.3,'#4a3200');grad.addColorStop(.5,'#f5c518');grad.addColorStop(.7,'#4a3200');grad.addColorStop(1,'#1a1200');
+  ctx.fillStyle=grad;ctx.fillRect(x,y,w,h);
+  const cH=15;
+  for(let cy=y;cy<y+h;cy+=cH){
+    const rh=Math.min(cH-2,y+h-cy);
+    const rg=ctx.createLinearGradient(x,0,x+w,0);
+    rg.addColorStop(0,'#6a4c00');rg.addColorStop(.25,'#c8a000');rg.addColorStop(.5,'#f5c518');rg.addColorStop(.75,'#c8a000');rg.addColorStop(1,'#6a4c00');
+    ctx.fillStyle=rg;ctx.fillRect(x+2,cy,w-4,rh);
+    ctx.fillStyle='rgba(255,255,255,.13)';ctx.fillRect(x+6,cy+1,w-20,3);
+    if((cy-y)%30<15){ctx.save();ctx.fillStyle='rgba(100,65,0,.7)';ctx.font='bold 8px monospace';ctx.textAlign='center';ctx.fillText('$',x+w/2,cy+rh-2);ctx.restore();}
+  }
+  ctx.strokeStyle='rgba(245,197,24,.35)';ctx.lineWidth=1.5;ctx.strokeRect(x+.75,y+.75,w-1.5,h-1.5);
+}
+
+// ══════════════════════════════════════════
+// GAME 2 — CHAD DODGE
+// ══════════════════════════════════════════
+const CD = {};
+
+function initDodge(){
+  parts=[];
+  Object.assign(CD,{st:'idle',score:0,frame:0,px:GW/2,speed:5.5,spTimer:0,obs:[],keys:{},touchX:null,stars:makeStars(40),lives:3,hitFlash:0,shakeX:0,shakeY:0});
+  document.onkeydown=e=>{CD.keys[e.key]=true;if(['Space','Enter'].includes(e.code)&&CD.st==='idle')CD.st='playing';};
+  document.onkeyup=e=>{CD.keys[e.key]=false;};
+  canvas.onclick=e=>{
+    if(CD.st==='idle'){CD.st='playing';return;}
+    const r=canvas.getBoundingClientRect();CD.touchX=(e.clientX-r.left)*(GW/r.width);
+  };
+  canvas.ontouchstart=e=>{
+    e.preventDefault();if(CD.st==='idle'){CD.st='playing';return;}
+    const r=canvas.getBoundingClientRect();CD.touchX=(e.touches[0].clientX-r.left)*(GW/r.width);
+  };
+  canvas.ontouchmove=e=>{
+    e.preventDefault();const r=canvas.getBoundingClientRect();CD.touchX=(e.touches[0].clientX-r.left)*(GW/r.width);
+  };
+}
+
+function tickDodge(dt){
+  CD.frame++;pUpdate(dt);
+  if(CD.hitFlash>0) CD.hitFlash-=dt;
+  if(CD.shakeX!==0){CD.shakeX*=.8;CD.shakeY*=.8;if(Math.abs(CD.shakeX)<.5){CD.shakeX=0;CD.shakeY=0;}}
+  if(CD.st!=='playing'){drawDodge();return;}
+  const gameSpd=1+CD.frame/1100;
+  const moveSpd=CD.speed*gameSpd;
+  if(CD.keys['ArrowLeft']||CD.keys['a']) CD.px-=moveSpd*dt;
+  if(CD.keys['ArrowRight']||CD.keys['d']) CD.px+=moveSpd*dt;
+  if(CD.touchX!==null){const dx=CD.touchX-CD.px;CD.px+=Math.sign(dx)*Math.min(Math.abs(dx),moveSpd*dt*1.6);}
+  CD.px=Math.max(24,Math.min(GW-24,CD.px));
+  CD.spTimer+=dt;
+  const interval=Math.max(28,68/gameSpd);
+  if(CD.spTimer>=interval){
+    CD.spTimer=0;const r=Math.random();
+    const type=r<.14?'green':r<.42?'redcandle':'jeet';
+    const ow=type==='jeet'?58:24;
+    CD.obs.push({x:ow/2+Math.random()*(GW-ow),y:-34,ow,type,vy:(type==='green'?2.4:3.4)*gameSpd});
+  }
+  for(let i=CD.obs.length-1;i>=0;i--){
+    const o=CD.obs[i];o.y+=o.vy*dt;
+    if(o.y>GH+44){CD.obs.splice(i,1);continue;}
+    const hit=Math.abs(o.x-CD.px)<(22+o.ow/2)-6&&Math.abs(o.y-(GH-60))<(22+28)-6;
+    if(hit){
+      if(o.type==='green'){CD.score+=50;pSpawn(o.x,o.y,'#00ff5e',14);CD.obs.splice(i,1);}
+      else{
+        CD.lives--;CD.hitFlash=12;CD.shakeX=(Math.random()-.5)*16;CD.shakeY=(Math.random()-.5)*8;
+        pSpawn(CD.px,GH-60,'#ff3a3a',12);CD.obs.splice(i,1);
+        if(CD.lives<=0){cdDie();return;}
+      }
+    }
+  }
+  CD.score=Math.floor(CD.frame/6)+(CD.score%50===0&&CD.score>0?CD.score:0);
+  CD.score=Math.floor(CD.frame/6);
+  // Track bonus separately
+  drawDodge();
+}
+
+function cdDie(){
+  CD.st='dead';pSpawn(CD.px,GH-60,'#ff3a3a',22);
+  gameOver(CD.score,'Chad Dodge','dodge');
+}
+
+function drawDodge(){
+  ctx.save();
+  if(CD.shakeX||CD.shakeY) ctx.translate(CD.shakeX,CD.shakeY);
+  drawBg();drawStars(CD.stars,CD.frame);
+  CD.obs.forEach(o=>{
+    if(o.type==='jeet'){
+      ctx.save();ctx.fillStyle='rgba(255,40,40,.13)';ctx.strokeStyle='#ff3a3a';ctx.lineWidth=2;
+      rrect(o.x-o.ow/2-4,o.y-18,o.ow+8,36,6);ctx.fill();ctx.stroke();
+      ctx.fillStyle='#ff3a3a';ctx.font='bold 17px "DM Mono",monospace';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('JEET',o.x,o.y);ctx.restore();
+    } else {
+      const isGreen=o.type==='green';const col=isGreen?'#00c844':'#cc2200';const glow=isGreen?'rgba(0,229,84,.5)':'rgba(255,40,0,.5)';
+      ctx.save();ctx.fillStyle=col;ctx.fillRect(o.x-10,o.y-18,20,36);
+      ctx.strokeStyle=isGreen?'#00ff5e':'#ff3a3a';ctx.lineWidth=1.5;ctx.strokeRect(o.x-10,o.y-18,20,36);
+      const fg=ctx.createRadialGradient(o.x,o.y+18,0,o.x,o.y+18,14);
+      fg.addColorStop(0,isGreen?'#00ff5e':'#ff6600');fg.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=fg;ctx.beginPath();ctx.arc(o.x,o.y+18,14,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle=glow;ctx.shadowColor=glow;ctx.shadowBlur=14;ctx.beginPath();ctx.arc(o.x,o.y+18,6,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+      ctx.fillStyle=isGreen?'#00ff5e':'#ff3a3a';ctx.font='bold 8px "DM Mono",monospace';ctx.textAlign='center';
+      ctx.fillText(isGreen?'+50':'RED',o.x,o.y-22);ctx.restore();
+    }
+  });
+  pDraw();
+  // Lives display
+  for(let i=0;i<3;i++){
+    const alive=i<CD.lives;
+    ctx.save();ctx.globalAlpha=alive?1:.25;
+    drawChad(18+i*32,22,12,0);ctx.restore();
+  }
+  drawChad(CD.px,GH-60,22,0);
+  ctx.save();ctx.globalAlpha=.18;ctx.fillStyle='#00e554';ctx.font='16px monospace';ctx.textAlign='left';ctx.fillText('◀',14,GH-12);ctx.textAlign='right';ctx.fillText('▶',GW-14,GH-12);ctx.restore();
+  if(CD.st!=='idle') drawScore(CD.score,GW/2,52);
+  if(CD.st==='idle') drawIdleOverlay('CHAD DODGE','DODGE JEETS · CATCH 🕯️ FOR +50',CD.frame);
+  if(CD.hitFlash>0){ctx.fillStyle=`rgba(255,0,0,${Math.min(.5,CD.hitFlash/15)})`;ctx.fillRect(0,0,GW,GH);}
+  ctx.restore();
+}
+
+// ══════════════════════════════════════════
+// GAME 3 — MOON OR RUG
+// ══════════════════════════════════════════
+const MR = {};
+
+function initMoonRug(){
+  parts=[];
+  Object.assign(MR,{st:'idle',score:0,streak:0,frame:0,coinA:0,spinning:false,result:null,choice:null,timeLeft:2000,timeCap:2000,roundActive:false,flash:null,flashT:0,stars:makeStars(44),bonusText:''});
+  canvas.onclick=e=>{
+    if(MR.st==='idle'){mrStart();return;}
+    if(!MR.roundActive||MR.choice)return;
+    const r=canvas.getBoundingClientRect();
+    mrInput((e.clientX-r.left)*(GW/r.width),(e.clientY-r.top)*(GH/r.height));
+  };
+  canvas.ontouchstart=e=>{
+    e.preventDefault();if(MR.st==='idle'){mrStart();return;}
+    if(!MR.roundActive||MR.choice)return;
+    const r=canvas.getBoundingClientRect();
+    mrInput((e.touches[0].clientX-r.left)*(GW/r.width),(e.touches[0].clientY-r.top)*(GH/r.height));
+  };
+  document.onkeydown=e=>{
+    if(MR.st==='idle'&&e.code==='Space') mrStart();
+    if(!MR.roundActive||MR.choice)return;
+    if(e.key==='ArrowLeft'||e.key.toLowerCase()==='m') mrPick('moon');
+    if(e.key==='ArrowRight'||e.key.toLowerCase()==='r') mrPick('rug');
+  };
+}
+
+function mrStart(){MR.st='playing';mrNextRound();}
+
+function mrNextRound(){
+  MR.roundActive=false;MR.choice=null;MR.flash=null;MR.bonusText='';
+  MR.result=Math.random()<.5?'moon':'rug';MR.spinning=true;MR.coinA=0;
+  MR.timeCap=Math.max(600,2000-MR.score*55);MR.timeLeft=MR.timeCap;
+  setTimeout(()=>{MR.spinning=false;MR.roundActive=true;},800);
+}
+
+function mrInput(cx,cy){
+  const bY=GH-125,bH=64,bW=108,mX=GW/2-120,rX=GW/2+12;
+  if(cy<bY||cy>bY+bH)return;
+  if(cx>=mX&&cx<=mX+bW) mrPick('moon');
+  else if(cx>=rX&&cx<=rX+bW) mrPick('rug');
+}
+
+function mrPick(choice){
+  if(!MR.roundActive||MR.choice)return;
+  MR.choice=choice;MR.roundActive=false;
+  const correct=choice===MR.result;MR.flash=correct?'correct':'wrong';MR.flashT=0;
+  if(correct){
+    MR.score+=100;MR.streak++;
+    pSpawn(GW/2,GH/2,'#00ff5e',16);
+    if(MR.streak>=5){MR.score+=100;MR.bonusText='🔥 5-STREAK +100!';pSpawn(GW/2,GH/2,'#f5c518',30);}
+    else if(MR.streak>=3){MR.score+=50;MR.bonusText='🔥 3-STREAK +50!';pSpawn(GW/2,GH/2,'#f5c518',22);}
+    else MR.bonusText='';
+    setTimeout(()=>mrNextRound(),900);
+  } else {mrDie();}
+}
+
+function mrDie(){MR.st='dead';pSpawn(GW/2,GH/2,'#ff3a3a',22);gameOver(MR.score,'Moon or Rug','moonrug');}
+
+function tickMoonRug(dt){
+  MR.frame++;pUpdate(dt);MR.coinA+=(MR.spinning?.28:.05)*dt;
+  if(MR.flash!==null) MR.flashT+=dt;
+  if(MR.roundActive&&!MR.choice){
+    MR.timeLeft-=16.667*dt;
+    if(MR.timeLeft<=0){MR.timeLeft=0;MR.choice='timeout';MR.flash='timeout';mrDie();}
+  }
+  drawMoonRug();
+}
+
+function drawMoonRug(){
+  drawBg();drawStars(MR.stars,MR.frame);pDraw();
+  if(MR.st==='idle'){drawCoin(GW/2,GH/2+60,50,MR.coinA);drawIdleOverlay('MOON OR RUG','REFLEX COIN FLIP · M=MOON  R=RUG',MR.frame);return;}
+  drawScore(MR.score,GW/2,52);
+  if(MR.streak>=3){
+    ctx.save();ctx.textAlign='center';ctx.fillStyle='#f5c518';ctx.font='700 12px "DM Mono",monospace';
+    ctx.fillText(MR.streak+'🔥 STREAK',GW/2,72);ctx.restore();
+  }
+  if(MR.bonusText){
+    ctx.save();ctx.textAlign='center';ctx.fillStyle='#f5c518';ctx.font='bold 16px "Bebas Neue",sans-serif';
+    ctx.fillText(MR.bonusText,GW/2,90);ctx.restore();
+  }
+  // Timer bar
+  const bx=40,by=100,bw=GW-80,bh=8,pct=MR.timeLeft/MR.timeCap;
+  ctx.fillStyle='rgba(255,255,255,.07)';rrect(bx,by,bw,bh,4);ctx.fill();
+  const bc=pct>.5?'#00e554':pct>.25?'#f5c518':'#ff3a3a';
+  ctx.fillStyle=bc;ctx.shadowColor=bc;ctx.shadowBlur=8;rrect(bx,by,Math.max(bh,bw*pct),bh,4);ctx.fill();ctx.shadowBlur=0;
+  drawCoin(GW/2,GH/2-30,58,MR.coinA);
+  // Flash result
+  if(MR.flash&&MR.flashT<45){
+    const a=Math.min(1,MR.flashT/6);ctx.save();ctx.textAlign='center';ctx.globalAlpha=a;
+    const txt=MR.flash==='correct'?(MR.streak>=3?'🔥 STREAK!':'✅ CHAD!'):(MR.flash==='timeout'?'⏰ TOO SLOW!':'❌ WRONG!');
+    ctx.fillStyle=MR.flash==='correct'?'#00ff5e':'#ff3a3a';ctx.shadowColor=ctx.fillStyle;ctx.shadowBlur=22;
+    ctx.font='bold 42px "Bebas Neue",sans-serif';ctx.fillText(txt,GW/2,GH/2+50);ctx.restore();
+  }
+  // Buttons
+  const bY2=GH-125,bH2=64,bW2=108,mX=GW/2-120,rX=GW/2+12;
+  const isLive=MR.roundActive&&!MR.choice;
+  const mChosen=MR.choice==='moon';
+  ctx.fillStyle=mChosen?(MR.flash==='correct'?'#00e554':'#ff3a3a'):(isLive?'#00e554':'rgba(0,229,84,.2)');
+  rrect(mX,bY2,bW2,bH2,12);ctx.fill();
+  ctx.fillStyle=mChosen?'#fff':(isLive?'#06100a':'rgba(0,229,84,.55)');
+  ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='bold 17px "Bebas Neue",sans-serif';ctx.fillText('🌙  MOON',mX+bW2/2,bY2+bH2/2);
+  const rChosen=MR.choice==='rug';
+  ctx.fillStyle=rChosen?(MR.flash==='correct'?'#00e554':'#ff3a3a'):(isLive?'#ff3a3a':'rgba(255,58,58,.2)');
+  rrect(rX,bY2,bW2,bH2,12);ctx.fill();
+  ctx.fillStyle=rChosen?'#fff':(isLive?'#fff':'rgba(255,58,58,.55)');
+  ctx.font='bold 17px "Bebas Neue",sans-serif';ctx.fillText('💀  RUG',rX+bW2/2,bY2+bH2/2);
+  ctx.textBaseline='alphabetic';
+  ctx.save();ctx.globalAlpha=.28;ctx.textAlign='center';ctx.font='9px "DM Mono",monospace';ctx.fillStyle='#fff';
+  ctx.fillText('← or M',mX+bW2/2,bY2+bH2+14);ctx.fillText('→ or R',rX+bW2/2,bY2+bH2+14);ctx.restore();
+}
+
+// ══════════════════════════════════════════
+// HOMEPAGE INTERACTIONS
+// ══════════════════════════════════════════
+function toggleFaq(qEl){
+  const item = qEl.closest('.faq2-item');
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq2-item.open').forEach(el=>el.classList.remove('open'));
+  if(!isOpen) item.classList.add('open');
+}
+
+function initStatementReveal(){
+  const text = "Most memecoins give you nothing. $CHAD gives you an arcade, weekly prizes, and a reason to hold.";
+  const accentWords = ['$CHAD','arcade,','prizes,'];
+  const container = document.getElementById('statement-words');
+  if(!container) return;
+  container.innerHTML = text.split(' ').map(w=>{
+    const cls = accentWords.includes(w) ? 's-word accent' : 's-word';
+    return `<span class="${cls}">${w}</span>`;
+  }).join(' ');
+
+  const words = container.querySelectorAll('.s-word');
+  const obs = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        words.forEach((w,i)=>setTimeout(()=>w.classList.add('lit'),i*80));
+        obs.disconnect();
+      }
+    });
+  },{threshold:0.3});
+  obs.observe(container);
+}
+
+function initScrollReveal(){
+  const els = document.querySelectorAll('.reveal');
+  const obs = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}});
+  },{threshold:0.12});
+  els.forEach(el=>obs.observe(el));
+}
+
+// ── BOOT ──
+showScreen('screen-hero');
+</script>
+</body>
+</html>
