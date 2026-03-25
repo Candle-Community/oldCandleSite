@@ -50,6 +50,7 @@ export default async function Home() {
             <a href="#rings" className="hover:text-yellow-400 transition-colors">Community</a>
             <a href="#discord" className="hover:text-yellow-400 transition-colors">Discord</a>
             <a href="#token" className="hover:text-yellow-400 transition-colors">$CNDL</a>
+            <a href="/tracker" className="text-yellow-400 font-semibold hover:text-yellow-300 transition-colors border border-yellow-400/20 rounded-full px-3 py-1">🎬 Tracker</a>
           </nav>
           <div className="flex items-center gap-2">
             <span className="text-xs text-gray-500 border border-[#222] rounded-full px-3 py-1">Members Only</span>

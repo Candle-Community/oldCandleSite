@@ -56,11 +56,15 @@ export async function GET() {
       getRoleMemberCount(ROLE_IDS.elite, token),
     ]);
 
-    return NextResponse.json({
-      totalMembers,
-      rings: { verified, holder, believer, elite },
-    });
+    return NextResponse.json(
+      { totalMembers, rings: { verified, holder, believer, elite } },
+      { headers: { "Access-Control-Allow-Origin": "*" } }
+    );
   } catch (e) {
-    return NextResponse.json({ error: String(e) }, { status: 500 });
+    return NextResponse.json({ error: String(e) }, { status: 500, headers: { "Access-Control-Allow-Origin": "*" } });
   }
+}
+
+export async function OPTIONS() {
+  return new Response(null, { headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET" } });
 }

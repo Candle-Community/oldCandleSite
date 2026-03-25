@@ -70,15 +70,15 @@ export async function GET() {
 
     const topHolders = holdersData?.result?.value ?? [];
 
-    return NextResponse.json({
-      mint: CNDL_MINT,
-      supply: adjustedSupply,
-      decimals,
-      price,
-      holderCount,
-      topHolders: topHolders.slice(0, 10),
-    });
+    return NextResponse.json(
+      { mint: CNDL_MINT, supply: adjustedSupply, decimals, price, holderCount, topHolders: topHolders.slice(0, 10) },
+      { headers: { "Access-Control-Allow-Origin": "*" } }
+    );
   } catch (e) {
-    return NextResponse.json({ error: String(e) }, { status: 500 });
+    return NextResponse.json({ error: String(e) }, { status: 500, headers: { "Access-Control-Allow-Origin": "*" } });
   }
+}
+
+export async function OPTIONS() {
+  return new Response(null, { headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET" } });
 }
