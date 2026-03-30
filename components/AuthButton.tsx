@@ -24,7 +24,7 @@ export default function AuthButton() {
           {session.user.discordTag ?? session.user.name}
         </span>
         <button
-          onClick={() => signOut()}
+          onClick={() => signOut({ callbackUrl: "/" })}
           className="text-xs text-gray-500 border border-white/10 rounded-full px-3 py-1.5 hover:border-red-500/50 hover:text-red-400 transition-colors font-medium"
         >
           Sign out

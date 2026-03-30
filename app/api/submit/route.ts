@@ -6,6 +6,9 @@ export async function POST(req: NextRequest) {
   if (!session) {
     return NextResponse.json({ error: "Sign in with Discord first" }, { status: 401 });
   }
+  if (!session.user.discordId) {
+    return NextResponse.json({ error: "Discord identity not found in session" }, { status: 401 });
+  }
 
   const { postUrl, xHandle } = await req.json();
   if (!postUrl) {

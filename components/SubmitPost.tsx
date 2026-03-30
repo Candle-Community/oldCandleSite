@@ -57,6 +57,14 @@ function SubmitModal({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [onClose]);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!agreed) return;
@@ -86,8 +94,13 @@ function SubmitModal({
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ background: "rgba(0,0,0,0.75)" }}
+      onClick={onClose}
     >
-      <div className="relative w-full max-w-3xl rounded-2xl overflow-hidden border border-white/[0.08] flex" style={{ minHeight: 440 }}>
+      <div
+        className="relative w-full max-w-3xl rounded-2xl overflow-hidden border border-white/[0.08] flex"
+        style={{ minHeight: 440 }}
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Left: checklist */}
         <div className="w-80 flex-shrink-0 bg-[#111318] p-8 border-r border-white/[0.06]">
           <h3 className="font-bold text-white text-base mb-2">Submission checklist</h3>
