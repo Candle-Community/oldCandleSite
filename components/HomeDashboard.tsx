@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import Leaderboard from "./Leaderboard";
 import EliteBot from "./EliteBot";
@@ -8,8 +9,10 @@ import DiscordStats from "./DiscordStats";
 import CommunityRings from "./CommunityRings";
 import CNDLToken from "./CNDLToken";
 import ClippingTool from "./ClippingTool";
+import SubmitPost from "./SubmitPost";
+import AuthButton from "./AuthButton";
 
-type Tab = "clipping" | "dashboard" | "community" | "payouts" | "launchbot";
+type Tab = "clipping" | "dashboard" | "community" | "payouts" | "launchbot" | "submit";
 
 type Props = {
   leaderboard: any[];
@@ -22,13 +25,15 @@ type Props = {
 
 export default function HomeDashboard({ leaderboard, cpm, stats, posts, discordData, tokenData }: Props) {
   const [tab, setTab] = useState<Tab>("clipping");
+  const { data: session } = useSession();
 
   const tabs: { id: Tab; label: string }[] = [
-    { id: "clipping",   label: "✂ Clipping"  },
-    { id: "dashboard",  label: "Dashboard"   },
-    { id: "community",  label: "Community"   },
-    { id: "payouts",    label: "Payouts"     },
-    { id: "launchbot",  label: "LaunchBot"   },
+    { id: "clipping",  label: "✂ Clipping" },
+    { id: "dashboard", label: "Dashboard"  },
+    { id: "community", label: "Community"  },
+    { id: "payouts",   label: "Payouts"    },
+    { id: "submit",    label: "Submit"     },
+    { id: "launchbot", label: "LaunchBot"  },
   ];
 
   return (
@@ -64,12 +69,15 @@ export default function HomeDashboard({ leaderboard, cpm, stats, posts, discordD
           </div>
 
           {/* Right side */}
-          <Link
-            href="/tracker"
-            className="text-xs text-gray-500 border border-white/10 rounded-full px-3 py-1.5 hover:border-[#32fe9f]/50 hover:text-gray-300 transition-colors font-medium"
-          >
-            Tracker →
-          </Link>
+          <div className="flex items-center gap-3">
+            <AuthButton />
+            <Link
+              href="/tracker"
+              className="text-xs text-gray-500 border border-white/10 rounded-full px-3 py-1.5 hover:border-[#32fe9f]/50 hover:text-gray-300 transition-colors font-medium"
+            >
+              Tracker →
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -115,6 +123,25 @@ export default function HomeDashboard({ leaderboard, cpm, stats, posts, discordD
               <p className="text-gray-400 text-sm mt-1">Live $CNDL token price, holders, and clipping payouts</p>
             </div>
             <CNDLToken stats={stats} cpm={cpm} tokenData={tokenData} />
+          </div>
+        )}
+
+        {tab === "submit" && (
+          <div className="space-y-8">
+            <div>
+              <h1 className="text-2xl font-bold">Submit</h1>
+              <p className="text-gray-400 text-sm mt-1">
+                Earn $CNDL for every 1,000 views on your approved X posts
+              </p>
+            </div>
+            {session ? (
+              <SubmitPost />
+            ) : (
+              <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-16 flex flex-col items-center gap-4">
+                <div className="text-gray-500 text-sm">Sign in with Discord to submit posts and track your earnings</div>
+                <AuthButton />
+              </div>
+            )}
           </div>
         )}
 
