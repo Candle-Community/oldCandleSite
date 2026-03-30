@@ -297,7 +297,7 @@ export default function SubmitPost() {
                 onClick={() => setFilter(tab.id)}
                 className={`flex items-center gap-2 pb-3 text-sm font-medium transition-colors border-b-2 ${
                   filter === tab.id
-                    ? "text-white border-[#32fe9f]"
+                    ? "text-[#32fe9f] border-[#32fe9f]"
                     : "text-gray-500 border-transparent hover:text-gray-300"
                 }`}
               >
