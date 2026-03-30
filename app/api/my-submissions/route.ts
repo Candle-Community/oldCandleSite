@@ -14,5 +14,5 @@ export async function GET() {
   );
 
   const data = await upstream.json();
-  return NextResponse.json(data);
+  return NextResponse.json(data, { status: upstream.status });
 }
