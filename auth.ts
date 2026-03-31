@@ -3,6 +3,7 @@ import Discord from "next-auth/providers/discord";
 import type { DiscordProfile } from "next-auth/providers/discord";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  trustHost: true,
   providers: [Discord],
   callbacks: {
     jwt({ token, profile }) {
