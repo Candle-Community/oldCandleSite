@@ -98,7 +98,7 @@ export default function TrackerPage() {
       <header className="border-b border-[#1a1a1a] px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-black font-bold text-sm">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#00c896] to-[#009e78] flex items-center justify-center text-black font-bold text-sm">
               C
             </div>
             <span className="font-bold text-lg tracking-tight">
@@ -122,7 +122,7 @@ export default function TrackerPage() {
                 onClick={() => setActiveTab(t.id)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                   activeTab === t.id
-                    ? "bg-yellow-400/10 text-yellow-400 border border-yellow-400/20"
+                    ? "bg-[#00c896]/10 text-[#00c896] border border-[#00c896]/20"
                     : "text-gray-400 hover:text-white hover:bg-white/5"
                 }`}
               >
@@ -133,9 +133,9 @@ export default function TrackerPage() {
 
           <Link
             href="/"
-            className="text-xs text-gray-500 border border-[#222] rounded-full px-3 py-1 hover:border-yellow-400/40 hover:text-gray-300 transition-colors"
+            className="text-xs text-gray-500 border border-[#222] rounded-full px-3 py-1 hover:border-[#00c896]/40 hover:text-gray-300 transition-colors"
           >
-            ← Back to Dashboard
+            ← Back to Main
           </Link>
         </div>
       </header>
@@ -199,7 +199,7 @@ function DashboardTab() {
           { label: "$CNDL Owed",     value: totalCndl.toFixed(2)     },
         ].map((s) => (
           <div key={s.label} className="card p-5">
-            <div className="text-2xl font-bold text-yellow-400">{s.value}</div>
+            <div className="text-2xl font-bold text-[#00c896]">{s.value}</div>
             <div className="text-xs text-gray-500 mt-1">{s.label}</div>
           </div>
         ))}
@@ -234,7 +234,7 @@ function DashboardTab() {
                     <td className="px-4 py-3 text-lg">{medals[i] || i + 1}</td>
                     <td className="px-4 py-3">
                       <a href={`https://x.com/${r.xHandle}`} target="_blank" rel="noreferrer"
-                        className="text-yellow-400 hover:text-yellow-300 transition-colors font-medium">
+                        className="text-[#00c896] hover:text-[#33d4aa] transition-colors font-medium">
                         @{r.xHandle}
                       </a>
                     </td>
@@ -262,12 +262,12 @@ function DashboardTab() {
               placeholder="Search by handle..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="bg-[#111] border border-[#222] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 outline-none focus:border-yellow-400/50 w-48"
+              className="bg-[#111] border border-[#222] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 outline-none focus:border-[#00c896]/50 w-48"
             />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="bg-[#111] border border-[#222] rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-yellow-400/50"
+              className="bg-[#111] border border-[#222] rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#00c896]/50"
             >
               <option value="all">All Posts</option>
               <option value="approved">Approved</option>
@@ -283,11 +283,11 @@ function DashboardTab() {
             {[...filtered].reverse().map((p) => {
               const m = members.find((m) => m.xHandle === p.xHandle);
               return (
-                <div key={p.id} className={`card p-5 border-l-2 ${p.approved ? "border-l-green-500" : "border-l-yellow-500"}`}>
+                <div key={p.id} className={`card p-5 border-l-2 ${p.approved ? "border-l-green-500" : "border-l-[#00c896]"}`}>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="font-semibold text-yellow-400">@{p.xHandle}</span>
+                    <span className="font-semibold text-[#00c896]">@{p.xHandle}</span>
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                      p.approved ? "bg-green-500/10 text-green-400" : "bg-yellow-500/10 text-yellow-400"
+                      p.approved ? "bg-green-500/10 text-green-400" : "bg-[#00c896]/10 text-[#00c896]"
                     }`}>
                       {p.approved ? "Approved" : "Pending"}
                     </span>
@@ -308,7 +308,7 @@ function DashboardTab() {
                   </div>
                   {p.notes && <div className="text-xs text-gray-500 italic mb-3">{p.notes}</div>}
                   <a href={p.postUrl} target="_blank" rel="noreferrer"
-                    className="text-xs text-yellow-400 hover:text-yellow-300 font-semibold transition-colors">
+                    className="text-xs text-[#00c896] hover:text-[#33d4aa] font-semibold transition-colors">
                     View Post →
                   </a>
                 </div>
@@ -354,7 +354,7 @@ function MembersTab() {
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="px-4 py-2 bg-yellow-400 text-black rounded-lg text-sm font-bold hover:bg-yellow-300 transition-colors"
+          className="px-4 py-2 bg-[#00c896] text-black rounded-lg text-sm font-bold hover:bg-[#33d4aa] transition-colors"
         >
           + Add Member
         </button>
@@ -367,17 +367,17 @@ function MembersTab() {
             <div>
               <label className="block text-xs text-gray-500 uppercase tracking-wider mb-2">X Handle</label>
               <input value={xHandle} onChange={(e) => setXHandle(e.target.value)} placeholder="@username"
-                className="w-full bg-[#0a0a0a] border border-[#222] rounded-lg px-4 py-3 text-sm text-white placeholder-gray-600 outline-none focus:border-yellow-400/50" />
+                className="w-full bg-[#0a0a0a] border border-[#222] rounded-lg px-4 py-3 text-sm text-white placeholder-gray-600 outline-none focus:border-[#00c896]/50" />
             </div>
             <div>
               <label className="block text-xs text-gray-500 uppercase tracking-wider mb-2">Discord Username</label>
               <input value={discord} onChange={(e) => setDiscord(e.target.value)} placeholder="username"
-                className="w-full bg-[#0a0a0a] border border-[#222] rounded-lg px-4 py-3 text-sm text-white placeholder-gray-600 outline-none focus:border-yellow-400/50" />
+                className="w-full bg-[#0a0a0a] border border-[#222] rounded-lg px-4 py-3 text-sm text-white placeholder-gray-600 outline-none focus:border-[#00c896]/50" />
             </div>
           </div>
           <div className="flex gap-3">
             <button onClick={addMember}
-              className="px-4 py-2 bg-yellow-400 text-black rounded-lg text-sm font-bold hover:bg-yellow-300 transition-colors">
+              className="px-4 py-2 bg-[#00c896] text-black rounded-lg text-sm font-bold hover:bg-[#33d4aa] transition-colors">
               Add Member
             </button>
             <button onClick={() => setShowForm(false)}
@@ -397,7 +397,7 @@ function MembersTab() {
             const totalViews = mPosts.reduce((s, p) => s + (p.views || 0), 0);
             return (
               <div key={m.id} className="card p-5">
-                <div className="font-semibold text-yellow-400 mb-1">@{m.xHandle}</div>
+                <div className="font-semibold text-[#00c896] mb-1">@{m.xHandle}</div>
                 {m.discordUsername && <div className="text-sm text-gray-500 mb-4">{m.discordUsername}</div>}
                 <div className="flex gap-6 mt-auto">
                   {[
@@ -482,7 +482,7 @@ function SubmitTab() {
         </Field>
 
         <button onClick={submit}
-          className="w-full py-3 bg-yellow-400 text-black rounded-lg font-bold text-sm hover:bg-yellow-300 transition-colors">
+          className="w-full py-3 bg-[#00c896] text-black rounded-lg font-bold text-sm hover:bg-[#33d4aa] transition-colors">
           Submit for Approval →
         </button>
 
@@ -502,7 +502,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   return (
     <div>
       <label className="block text-xs text-gray-500 uppercase tracking-wider mb-2">{label}</label>
-      <div className="[&_input]:w-full [&_input]:bg-[#0a0a0a] [&_input]:border [&_input]:border-[#222] [&_input]:rounded-lg [&_input]:px-4 [&_input]:py-3 [&_input]:text-sm [&_input]:text-white [&_input]:placeholder-gray-600 [&_input]:outline-none [&_input:focus]:border-yellow-400/50 [&_textarea]:w-full [&_textarea]:bg-[#0a0a0a] [&_textarea]:border [&_textarea]:border-[#222] [&_textarea]:rounded-lg [&_textarea]:px-4 [&_textarea]:py-3 [&_textarea]:text-sm [&_textarea]:text-white [&_textarea]:placeholder-gray-600 [&_textarea]:outline-none [&_textarea:focus]:border-yellow-400/50 [&_textarea]:resize-none [&_textarea]:font-sans">
+      <div className="[&_input]:w-full [&_input]:bg-[#0a0a0a] [&_input]:border [&_input]:border-[#222] [&_input]:rounded-lg [&_input]:px-4 [&_input]:py-3 [&_input]:text-sm [&_input]:text-white [&_input]:placeholder-gray-600 [&_input]:outline-none [&_input:focus]:border-[#00c896]/50 [&_textarea]:w-full [&_textarea]:bg-[#0a0a0a] [&_textarea]:border [&_textarea]:border-[#222] [&_textarea]:rounded-lg [&_textarea]:px-4 [&_textarea]:py-3 [&_textarea]:text-sm [&_textarea]:text-white [&_textarea]:placeholder-gray-600 [&_textarea]:outline-none [&_textarea:focus]:border-[#00c896]/50 [&_textarea]:resize-none [&_textarea]:font-sans">
         {children}
       </div>
     </div>
@@ -544,7 +544,7 @@ function AdminTab() {
         {items.map((p) => (
           <div key={p.id} className="card p-5 flex items-center justify-between gap-4">
             <div className="flex-1 min-w-0">
-              <div className="font-semibold text-yellow-400 mb-1">@{p.xHandle}</div>
+              <div className="font-semibold text-[#00c896] mb-1">@{p.xHandle}</div>
               <div className="text-xs text-gray-500 mb-1">
                 {fmtDate(p.postDate)} · {fmtNum(p.views)} views · {fmtNum(p.likes)} likes · {fmtNum(p.reposts)} reposts
               </div>
@@ -581,7 +581,7 @@ function AdminTab() {
 
       <div className="grid grid-cols-3 gap-4 max-w-sm">
         <div className="card p-4 text-center">
-          <div className="text-xl font-bold text-yellow-400">{pending.length}</div>
+          <div className="text-xl font-bold text-[#00c896]">{pending.length}</div>
           <div className="text-xs text-gray-500 mt-1">Pending</div>
         </div>
         <div className="card p-4 text-center">
@@ -598,7 +598,7 @@ function AdminTab() {
         <h2 className="font-semibold mb-4 flex items-center gap-2">
           Pending Posts
           {pending.length > 0 && (
-            <span className="text-xs bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 px-2 py-0.5 rounded-full">
+            <span className="text-xs bg-[#00c896]/10 text-[#00c896] border border-[#00c896]/20 px-2 py-0.5 rounded-full">
               {pending.length}
             </span>
           )}
@@ -715,13 +715,13 @@ function ClippingTab() {
           onClick={() => document.getElementById("clip-file-input")?.click()}
           className={`border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-all duration-200 ${
             isDragging
-              ? "border-yellow-400 bg-yellow-400/5"
+              ? "border-[#00c896] bg-[#00c896]/5"
               : "border-[#222] hover:border-[#333] hover:bg-white/[0.02]"
           }`}
         >
           <div className="text-4xl mb-3">🎬</div>
           <p className="text-gray-400 text-sm">
-            <span className="text-yellow-400 font-semibold">Drop your stream file here</span>
+            <span className="text-[#00c896] font-semibold">Drop your stream file here</span>
           </p>
           <p className="text-gray-600 text-xs mt-1">or click to select — MP4, MOV, MKV</p>
           <input id="clip-file-input" type="file" accept="video/*" className="hidden"
@@ -739,20 +739,20 @@ function ClippingTab() {
           <div>
             <label className="block text-xs text-gray-500 uppercase tracking-wider mb-2">Stream Name</label>
             <input value={streamName} onChange={(e) => setStreamName(e.target.value)} placeholder="e.g. March_Stream_01"
-              className="w-full bg-[#0a0a0a] border border-[#222] rounded-lg px-4 py-3 text-sm text-white placeholder-gray-600 outline-none focus:border-yellow-400/50" />
+              className="w-full bg-[#0a0a0a] border border-[#222] rounded-lg px-4 py-3 text-sm text-white placeholder-gray-600 outline-none focus:border-[#00c896]/50" />
           </div>
           <div>
             <label className="block text-xs text-gray-500 uppercase tracking-wider mb-2">Clips to Generate</label>
             <input type="number" value={numClips} min={1} max={20}
               onChange={(e) => setNumClips(parseInt(e.target.value) || 8)}
-              className="w-full bg-[#0a0a0a] border border-[#222] rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-yellow-400/50" />
+              className="w-full bg-[#0a0a0a] border border-[#222] rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-[#00c896]/50" />
           </div>
         </div>
 
         <button
           onClick={processStream}
           disabled={!selectedFile || processing}
-          className="w-full py-3 bg-yellow-400 text-black rounded-lg font-bold text-sm hover:bg-yellow-300 transition-colors disabled:bg-[#222] disabled:text-gray-600 disabled:cursor-not-allowed"
+          className="w-full py-3 bg-[#00c896] text-black rounded-lg font-bold text-sm hover:bg-[#33d4aa] transition-colors disabled:bg-[#222] disabled:text-gray-600 disabled:cursor-not-allowed"
         >
           {processing ? "Processing..." : !selectedFile ? "Select a video to continue" : "Process Stream →"}
         </button>
@@ -774,7 +774,7 @@ function ClippingTab() {
           {/* Progress bar */}
           <div className="bg-[#0a0a0a] rounded-full h-1.5 overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full transition-all duration-700"
+              className="h-full bg-gradient-to-r from-[#00c896] to-[#009e78] rounded-full transition-all duration-700"
               style={{ width: `${status.pct}%` }}
             />
           </div>
@@ -786,12 +786,12 @@ function ClippingTab() {
               <div className="text-sm font-semibold text-green-400">✓ {status.clips.length} clips ready</div>
               {status.clips.map((c, i) => (
                 <div key={i} className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-xl p-4">
-                  <div className="font-semibold text-yellow-400 text-sm mb-1">Clip {i + 1} — {c.name}</div>
+                  <div className="font-semibold text-[#00c896] text-sm mb-1">Clip {i + 1} — {c.name}</div>
                   <div className="text-xs text-gray-400 italic mb-1">"{c.hook}"</div>
                   <div className="text-xs text-gray-600 mb-3">{c.reason}</div>
                   {c.drive_link && (
                     <a href={c.drive_link} target="_blank" rel="noreferrer"
-                      className="inline-block px-3 py-1.5 bg-yellow-400 text-black rounded-lg text-xs font-bold hover:bg-yellow-300 transition-colors">
+                      className="inline-block px-3 py-1.5 bg-[#00c896] text-black rounded-lg text-xs font-bold hover:bg-[#33d4aa] transition-colors">
                       Open in Drive →
                     </a>
                   )}
