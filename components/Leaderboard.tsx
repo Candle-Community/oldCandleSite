@@ -28,14 +28,14 @@ export default function Leaderboard({
   return (
     <div>
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-1 h-6 bg-gradient-to-b from-yellow-400 to-orange-500 rounded-full" />
+        <div className="w-1 h-6 bg-gradient-to-b from-[#32fe9f] to-[#20cb7f] rounded-full" />
         <h2 className="text-2xl font-bold">Elite Leaderboard</h2>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div className="card p-4">
           <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">Top Views</p>
-          <p className="text-3xl font-bold text-yellow-400">
+          <p className="text-3xl font-bold text-[#32fe9f]">
             {top ? formatNum(top.total_views) : "—"}
           </p>
           <p className="text-sm text-gray-400 mt-1">
@@ -44,7 +44,7 @@ export default function Leaderboard({
         </div>
         <div className="card p-4">
           <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">Top $CNDL Earned</p>
-          <p className="text-3xl font-bold text-yellow-400">
+          <p className="text-3xl font-bold text-[#32fe9f]">
             {top ? `${top.cndl_owed}` : "—"}
           </p>
           <p className="text-sm text-gray-400 mt-1">
@@ -68,7 +68,7 @@ export default function Leaderboard({
             <div
               key={m.discord_tag}
               className={`grid grid-cols-5 items-center px-5 py-4 border-b border-[#1a1a1a] last:border-0 hover:bg-[#151515] transition-colors ${
-                i < 3 ? "bg-[#111008]" : ""
+                i < 3 ? "bg-[#0a130c]" : ""
               }`}
             >
               <span className="font-bold text-sm flex items-center gap-2">
@@ -79,7 +79,7 @@ export default function Leaderboard({
                 )}
               </span>
               <div>
-                <p className={`font-medium text-sm ${i === 0 ? "text-yellow-400" : "text-gray-200"}`}>
+                <p className={`font-medium text-sm ${i === 0 ? "text-[#32fe9f]" : "text-gray-200"}`}>
                   @{m.discord_tag}
                 </p>
                 <p className="text-xs text-gray-600">@{m.x_handle} · {m.post_count} posts</p>

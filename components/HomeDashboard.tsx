@@ -10,6 +10,7 @@ import CNDLToken from "./CNDLToken";
 import ClippingTool from "./ClippingTool";
 import SubmitPost from "./SubmitPost";
 import AuthButton from "./AuthButton";
+import LaunchBot from "./LaunchBot";
 
 type Section = "main" | "clippers";
 type MainTab = "community" | "launchbot";
@@ -143,14 +144,12 @@ export default function HomeDashboard({ leaderboard, cpm, stats, posts, discordD
         )}
 
         {section === "main" && mainTab === "launchbot" && (
-          <div className="space-y-10">
+          <div className="space-y-6">
             <div>
               <h1 className="text-2xl font-bold">LaunchBot</h1>
-              <p className="text-gray-400 text-sm mt-1">Coming soon</p>
+              <p className="text-gray-400 text-sm mt-1">Real-time Solana launch intelligence</p>
             </div>
-            <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-12 text-center text-gray-500">
-              LaunchBot coming soon
-            </div>
+            <LaunchBot />
           </div>
         )}
 

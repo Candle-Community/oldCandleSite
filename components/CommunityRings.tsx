@@ -75,10 +75,10 @@ const RINGS = [
     label: "Elite",
     action: "Invitation only",
     emoji: "👑",
-    color: "#f5c518",
-    labelColor: "text-yellow-400",
-    borderColor: "border-yellow-500",
-    bgColor: "bg-yellow-500/10",
+    color: "#32fe9f",
+    labelColor: "text-[#32fe9f]",
+    borderColor: "border-[#32fe9f]",
+    bgColor: "bg-[#32fe9f]/10",
     r: 36,
     sw: 0,
     perks: ["Direct team access", "Revenue share", "Strategy sessions", "Founding member status"],
@@ -113,7 +113,7 @@ export default function CommunityRings({ discordData }: { discordData: DiscordDa
   return (
     <div>
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-1 h-6 bg-gradient-to-b from-yellow-400 to-orange-500 rounded-full" />
+        <div className="w-1 h-6 bg-gradient-to-b from-[#32fe9f] to-[#20cb7f] rounded-full" />
         <h2 className="text-2xl font-bold">Community Rings</h2>
         <span className="text-xs text-gray-600 border border-[#222] rounded-full px-3 py-1 ml-2">
           5 Rings{totalMembers !== null ? ` · ${totalMembers.toLocaleString()} members` : ""}

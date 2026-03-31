@@ -59,9 +59,9 @@ const rings = [
     key: "elite",
     name: "Elite",
     emoji: "👑",
-    color: "from-yellow-400 to-orange-500",
-    borderColor: "border-yellow-400",
-    textColor: "text-yellow-300",
+    color: "from-[#32fe9f] to-[#20cb7f]",
+    borderColor: "border-[#32fe9f]",
+    textColor: "text-[#33d4aa]",
     description: "The inner circle. OG founders and top contributors.",
     perks: ["All Believer perks", "Revenue share", "Strategy sessions", "Elite leaderboard access", "Founding member status"],
   },
@@ -84,7 +84,7 @@ export default function DiscordStats({
   return (
     <div>
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-1 h-6 bg-gradient-to-b from-yellow-400 to-orange-500 rounded-full" />
+        <div className="w-1 h-6 bg-gradient-to-b from-[#32fe9f] to-[#20cb7f] rounded-full" />
         <h2 className="text-2xl font-bold">Discord Community Stats</h2>
       </div>
 
@@ -104,7 +104,7 @@ export default function DiscordStats({
         </div>
         <div className="card p-4">
           <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">Elite Members</p>
-          <p className="text-3xl font-bold text-yellow-400">
+          <p className="text-3xl font-bold text-[#32fe9f]">
             {discordData?.rings?.elite ?? "—"}
           </p>
         </div>

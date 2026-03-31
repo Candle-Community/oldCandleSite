@@ -59,7 +59,7 @@ export default function EliteBot({
   return (
     <div>
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-1 h-6 bg-gradient-to-b from-yellow-400 to-orange-500 rounded-full" />
+        <div className="w-1 h-6 bg-gradient-to-b from-[#32fe9f] to-[#20cb7f] rounded-full" />
         <h2 className="text-2xl font-bold">Elite Bot</h2>
         <span className="ml-auto text-xs text-green-400 flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse inline-block" />
@@ -75,7 +75,7 @@ export default function EliteBot({
         </div>
         <div className="card p-4">
           <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">Total Views</p>
-          <p className="text-3xl font-bold text-yellow-400">
+          <p className="text-3xl font-bold text-[#32fe9f]">
             {stats ? formatNum(stats.totalViews) : "—"}
           </p>
           <p className="text-xs text-gray-600 mt-1">Approved posts</p>
@@ -116,7 +116,7 @@ export default function EliteBot({
                     href={post.post_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-gray-200 hover:text-yellow-400 transition-colors"
+                    className="text-sm text-gray-200 hover:text-[#33d4aa] transition-colors"
                   >
                     View post →
                   </a>
