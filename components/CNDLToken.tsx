@@ -33,29 +33,25 @@ function fmtUsd(n: number) {
   return "$" + n.toLocaleString();
 }
 
+const USD_CPM = 5;
+
 export default function CNDLToken({
   stats,
-  cpm,
+  cpm: _cpm,
   tokenData,
 }: {
   stats: Stats;
   cpm: number;
   tokenData: TokenData;
 }) {
-  const supply    = tokenData?.supply    ?? null;
   const price     = tokenData?.price     ?? null;
   const marketCap = tokenData?.marketCap ?? null;
   const fdv       = tokenData?.fdv       ?? null;
   const volume24h = tokenData?.volume24h ?? null;
   const change24h = tokenData?.change24h ?? null;
-  const liquidity = tokenData?.liquidity ?? null;
   const topHolders = tokenData?.topHolders ?? [];
 
   const changePositive = change24h !== null && change24h >= 0;
-
-  const top10Pct = topHolders.length > 0 && supply
-    ? topHolders.slice(0, 10).reduce((a, h) => a + h.uiAmount, 0) / supply * 100
-    : null;
 
   return (
     <div>
@@ -68,7 +64,7 @@ export default function CNDLToken({
       </div>
 
       {/* Market stats row 1 */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+      <div className="grid grid-cols-2 gap-4 mb-4">
         <div className="card p-4">
           <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">Price</p>
           <p className="text-2xl font-bold text-[#32fe9f]">
@@ -89,22 +85,6 @@ export default function CNDLToken({
             <p className="text-xs text-gray-600 mt-1">FDV {fmtUsd(fdv)}</p>
           )}
         </div>
-        <div className="card p-4">
-          <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">Supply</p>
-          <p className="text-2xl font-bold text-white">
-            {supply !== null ? fmt(supply) : "—"}
-          </p>
-          <p className="text-xs text-gray-600 mt-1">$CNDL tokens</p>
-        </div>
-        <div className="card p-4">
-          <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">Liquidity</p>
-          <p className="text-2xl font-bold text-white">
-            {liquidity !== null ? fmtUsd(liquidity) : "—"}
-          </p>
-          {volume24h !== null && (
-            <p className="text-xs text-gray-600 mt-1">Vol 24h {fmtUsd(volume24h)}</p>
-          )}
-        </div>
       </div>
 
       {/* Clipping payout stats */}
@@ -118,8 +98,13 @@ export default function CNDLToken({
         </div>
         <div className="card p-4">
           <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">CPM Rate</p>
-          <p className="text-2xl font-bold text-white">{cpm}</p>
-          <p className="text-xs text-gray-600 mt-1">$CNDL per 1K views</p>
+          <p className="text-2xl font-bold text-white">${USD_CPM} worth of $CNDL</p>
+          <p className="text-xs text-gray-600 mt-1">per 1,000 views</p>
+          {price !== null && (
+            <p className="text-xs text-[#32fe9f]/60 mt-0.5">
+              ≈ {(USD_CPM / price).toFixed(2)} $CNDL at live price
+            </p>
+          )}
         </div>
         <div className="card p-4">
           <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">Approved Posts</p>
@@ -138,14 +123,10 @@ export default function CNDLToken({
         <div className="card p-5">
           <p className="text-sm font-semibold text-gray-300 mb-4">
             Top Holders
-            {top10Pct !== null && (
-              <span className="ml-2 text-xs text-gray-500 font-normal">
-                Top 10 hold {top10Pct.toFixed(1)}% of supply
-              </span>
-            )}
           </p>
           <div className="space-y-3">
             {topHolders.slice(0, 8).map((h, i) => {
+              const supply = tokenData?.supply ?? null;
               const pct = supply ? (h.uiAmount / supply) * 100 : 0;
               return (
                 <div key={h.address}>

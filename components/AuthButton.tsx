@@ -25,7 +25,7 @@ export default function AuthButton() {
         </span>
         <button
           onClick={() => signOut({ callbackUrl: "/" })}
-          className="text-xs text-gray-500 border border-white/10 rounded-full px-3 py-1.5 hover:border-red-500/50 hover:text-red-400 transition-colors font-medium"
+          className="text-xs text-[#FF6021] bg-[#FF6021]/15 border border-[#FF6021]/80 rounded-full px-3 py-1.5 font-semibold shadow-[inset_0_5px_10px_rgba(255,96,33,0.15)] hover:bg-[#FF6021]/30 transition-all"
         >
           Sign out
         </button>
@@ -36,7 +36,7 @@ export default function AuthButton() {
   return (
     <button
       onClick={() => signIn("discord")}
-      className="text-xs text-gray-300 border border-[#5865F2]/50 rounded-full px-3 py-1.5 hover:border-[#5865F2] hover:bg-[#5865F2]/10 transition-colors font-medium"
+      className="text-xs text-[#FF6021] bg-[#FF6021]/15 border border-[#FF6021]/80 rounded-full px-3 py-1.5 font-semibold shadow-[inset_0_5px_10px_rgba(255,96,33,0.15)] hover:bg-[#FF6021]/30 transition-all"
     >
       Sign in with Discord
     </button>

@@ -347,10 +347,11 @@ export default function ClippingTool() {
           {/* Submit */}
           <button onClick={handleSubmit} disabled={!canSubmit} style={{
             width: "100%", padding: 15,
-            background: canSubmit ? "#32fe9f" : "rgba(255,255,255,0.07)",
-            color: canSubmit ? "#000" : "rgba(255,255,255,0.2)",
-            fontSize: "0.98rem", fontWeight: 900, border: "none", borderRadius: 12,
+            background: canSubmit ? "rgba(255,96,33,0.15)" : "rgba(255,255,255,0.07)",
+            color: canSubmit ? "#FF6021" : "rgba(255,255,255,0.2)",
+            fontSize: "0.98rem", fontWeight: 700, border: canSubmit ? "1px solid rgba(255,96,33,0.8)" : "1px solid transparent", borderRadius: 999,
             cursor: canSubmit ? "pointer" : "not-allowed",
+            boxShadow: canSubmit ? "inset 0 5px 10px rgba(255,96,33,0.2)" : "none",
             transition: "all 0.18s", fontFamily: "inherit", marginTop: 4,
           }}>
             {canSubmit ? "Generate Clips →" : "Select a video to continue"}
@@ -411,7 +412,7 @@ export default function ClippingTool() {
                 <p style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.35)", marginTop: 2 }}>Clips saved to Google Drive.</p>
               )}
             </div>
-            <button onClick={resetTool} style={{ padding: "8px 16px", background: "transparent", color: "#32fe9f", border: "1px solid rgba(50,254,159,0.25)", borderRadius: 8, fontSize: "0.78rem", fontWeight: 800, cursor: "pointer", fontFamily: "inherit" }}>
+            <button onClick={resetTool} style={{ padding: "8px 16px", background: "rgba(255,96,33,0.15)", color: "#FF6021", border: "1px solid rgba(255,96,33,0.8)", borderRadius: 999, fontSize: "0.78rem", fontWeight: 600, cursor: "pointer", fontFamily: "inherit", boxShadow: "inset 0 5px 10px rgba(255,96,33,0.15)", transition: "all 0.18s" }}>
               ← New Video
             </button>
           </div>

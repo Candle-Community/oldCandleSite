@@ -127,8 +127,8 @@ function SubmitModal({
             <div>
               <h2 className="font-bold text-white text-lg">Candle Elite Clipping</h2>
               <p className="text-gray-400 text-sm mt-0.5">
-                <span className="text-[#32fe9f] font-semibold">${cpm.toFixed(2)}</span>
-                {" / 1k views · Clipping"}
+                <span className="text-[#32fe9f] font-semibold">${cpm.toFixed(2)} USD</span>
+                {" worth of $CNDL per 1k views"}
               </p>
             </div>
             <button
@@ -205,7 +205,8 @@ export default function SubmitPost() {
   const { data: session } = useSession();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(false);
-  const [cpm, setCpm] = useState(10);
+  const [cpm, setCpm] = useState(5);
+  const [tokenPrice, setTokenPrice] = useState<number | null>(null);
   const [filter, setFilter] = useState<FilterTab>("all");
   const [showModal, setShowModal] = useState(false);
 
@@ -218,6 +219,7 @@ export default function SubmitPost() {
       if (data.posts) {
         setPosts(data.posts);
         setCpm(data.cpm);
+        if (data.tokenPrice) setTokenPrice(data.tokenPrice);
       }
     } finally {
       setLoading(false);
@@ -271,6 +273,7 @@ export default function SubmitPost() {
           icon="💰"
           label="Payouts"
           value={`${totalCndl} $CNDL`}
+          sub={tokenPrice ? `≈ $${(parseFloat(totalCndl) * tokenPrice).toFixed(2)} USD` : undefined}
           gradient="bg-gradient-to-br from-[#0a1f0a] to-[#0e0e14]"
         />
         <StatCard
@@ -283,8 +286,8 @@ export default function SubmitPost() {
         <StatCard
           icon="📈"
           label="CPM Rate"
-          value={`${cpm} $CNDL`}
-          sub="per 1k views"
+          value={`$${cpm}`}
+          sub="USD per 1k views"
           gradient="bg-gradient-to-br from-[#001a1a] to-[#0e0e14]"
         />
       </div>
@@ -295,7 +298,7 @@ export default function SubmitPost() {
           <h2 className="text-xl font-bold">My Submissions</h2>
           <button
             onClick={() => setShowModal(true)}
-            className="flex items-center gap-2 bg-[#32fe9f]/10 text-[#32fe9f] border border-[#32fe9f]/30 rounded-full px-4 py-1.5 text-sm font-semibold hover:bg-[#32fe9f]/20 transition-colors"
+            className="flex items-center gap-2 bg-[#FF6021]/15 text-[#FF6021] border border-[#FF6021]/80 rounded-full px-4 py-1.5 text-sm font-semibold shadow-[inset_0_5px_10px_rgba(255,96,33,0.15)] hover:bg-[#FF6021]/30 transition-all"
           >
             + Submit Post
           </button>
@@ -359,10 +362,15 @@ export default function SubmitPost() {
                     <div className="text-white text-sm font-medium">{post.views.toLocaleString()}</div>
                     <div className="text-gray-600 text-xs">views</div>
                   </div>
-                  <div className="text-right w-20">
+                  <div className="text-right w-28">
                     <div className="text-[#32fe9f] text-sm font-medium">
                       {post.approved === 1 ? `${post.cndl_owed} $CNDL` : "—"}
                     </div>
+                    {post.approved === 1 && tokenPrice && (
+                      <div className="text-gray-500 text-xs">
+                        ≈ ${(parseFloat(post.cndl_owed) * tokenPrice).toFixed(2)}
+                      </div>
+                    )}
                     <div className="text-gray-600 text-xs">earned</div>
                   </div>
                   <span

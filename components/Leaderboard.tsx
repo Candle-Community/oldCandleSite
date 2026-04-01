@@ -16,13 +16,24 @@ function formatNum(n: number) {
 
 const medals = ["👑", "🥈", "🥉"];
 
+const USD_CPM = 5;
+
 export default function Leaderboard({
   leaderboard,
   cpm,
+  tokenPrice,
 }: {
   leaderboard: LeaderboardRow[];
   cpm: number;
+  tokenPrice?: number | null;
 }) {
+  function cndlOwed(effective_views: number) {
+    if (tokenPrice && tokenPrice > 0) {
+      return ((effective_views / 1000) * (USD_CPM / tokenPrice)).toFixed(2);
+    }
+    return ((effective_views / 1000) * cpm).toFixed(2);
+  }
+
   const top = leaderboard[0];
 
   return (
@@ -45,10 +56,10 @@ export default function Leaderboard({
         <div className="card p-4">
           <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">Top $CNDL Earned</p>
           <p className="text-3xl font-bold text-[#32fe9f]">
-            {top ? `${top.cndl_owed}` : "—"}
+            {top ? cndlOwed(top.effective_views) : "—"}
           </p>
           <p className="text-sm text-gray-400 mt-1">
-            {top ? `@${top.x_handle} · CPM: ${cpm}` : `CPM: ${cpm}`}
+            {top ? `@${top.x_handle} · $${USD_CPM} / 1K views` : `$${USD_CPM} / 1K views`}
           </p>
         </div>
       </div>
@@ -91,7 +102,7 @@ export default function Leaderboard({
                 {formatNum(m.total_views)}
               </span>
               <span className="text-right text-sm font-mono text-green-400">
-                {m.cndl_owed}
+                {cndlOwed(m.effective_views)}
               </span>
             </div>
           ))}
@@ -99,7 +110,7 @@ export default function Leaderboard({
       )}
 
       <p className="text-xs text-gray-600 mt-3 text-right">
-        Ranked by effective views · CPM: {cpm} $CNDL / 1K views · Updates live
+        Ranked by effective views · ${USD_CPM} USD / 1K views · Updates live
       </p>
     </div>
   );

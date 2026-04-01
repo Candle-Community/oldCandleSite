@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 import Leaderboard from "./Leaderboard";
-import EliteBot from "./EliteBot";
 import DiscordStats from "./DiscordStats";
 import CommunityRings from "./CommunityRings";
 import CNDLToken from "./CNDLToken";
@@ -11,6 +10,8 @@ import ClippingTool from "./ClippingTool";
 import SubmitPost from "./SubmitPost";
 import AuthButton from "./AuthButton";
 import LaunchBot from "./LaunchBot";
+import AdminPanel from "./AdminPanel";
+import PayoutMembers from "./PayoutMembers";
 
 type Tab =
   | "community"
@@ -33,19 +34,10 @@ type Props = {
 export default function HomeDashboard({ leaderboard, cpm, stats, posts, discordData, tokenData }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>("community");
   const [distributionOpen, setDistributionOpen] = useState(false);
-  const [adminUnlocked, setAdminUnlocked] = useState(false);
-  const [adminInput, setAdminInput] = useState("");
-  const [adminError, setAdminError] = useState(false);
   const { data: session } = useSession();
 
-  function handleAdminUnlock() {
-    if (adminInput === "123rich67$") {
-      setAdminUnlocked(true);
-      setAdminError(false);
-    } else {
-      setAdminError(true);
-    }
-  }
+  const ADMIN_USERS = ["rich.cndl", ".aleedotg"];
+  const isAdmin = ADMIN_USERS.includes(session?.user?.discordTag ?? "");
 
   function selectTab(tab: Tab) {
     setActiveTab(tab);
@@ -59,7 +51,7 @@ export default function HomeDashboard({ leaderboard, cpm, stats, posts, discordD
     { id: "submit",      label: "Submit"       },
     { id: "leaderboard", label: "Leaderboard"  },
     { id: "payouts",     label: "Payouts"      },
-    { id: "admin",       label: "Admin"        },
+    ...(isAdmin ? [{ id: "admin" as Tab, label: "Admin" }] : []),
   ];
 
   const isDistributionActive = DISTRIBUTION_SUBS.some(s => s.id === activeTab);
@@ -101,7 +93,7 @@ export default function HomeDashboard({ leaderboard, cpm, stats, posts, discordD
               }}
               className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                 isDistributionActive
-                  ? "text-[#32fe9f] bg-[#32fe9f]/[0.08]"
+                  ? "text-[#FF6021] bg-[#FF6021]/[0.08]"
                   : "text-gray-400 hover:text-white hover:bg-white/[0.04]"
               }`}
             >
@@ -122,7 +114,7 @@ export default function HomeDashboard({ leaderboard, cpm, stats, posts, discordD
                     onClick={() => selectTab(s.id)}
                     className={`w-full text-left px-3 py-1.5 rounded-lg text-sm transition-colors ${
                       activeTab === s.id
-                        ? "text-[#32fe9f] bg-[#32fe9f]/[0.08] font-medium"
+                        ? "text-[#FF6021] bg-[#FF6021]/[0.08] font-medium"
                         : "text-gray-500 hover:text-gray-200 hover:bg-white/[0.04]"
                     }`}
                   >
@@ -184,8 +176,7 @@ export default function HomeDashboard({ leaderboard, cpm, stats, posts, discordD
           {activeTab === "leaderboard" && (
             <div className="space-y-10">
               <PageHeader title="Leaderboard" sub="Live leaderboard and post activity" />
-              <Leaderboard leaderboard={leaderboard} cpm={cpm} />
-              <EliteBot posts={posts} stats={stats} cpm={cpm} />
+              <Leaderboard leaderboard={leaderboard} cpm={cpm} tokenPrice={tokenData?.price} />
             </div>
           )}
 
@@ -193,34 +184,18 @@ export default function HomeDashboard({ leaderboard, cpm, stats, posts, discordD
             <div className="space-y-10">
               <PageHeader title="Payouts" sub="Live $CNDL token price, holders, and clipping payouts" />
               <CNDLToken stats={stats} cpm={cpm} tokenData={tokenData} />
+              <PayoutMembers />
             </div>
           )}
 
           {activeTab === "admin" && (
             <div className="space-y-8">
-              <PageHeader title="Admin" sub="Restricted access" />
-              {adminUnlocked ? (
-                <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-12 text-center text-gray-400">
-                  Admin panel coming soon
-                </div>
+              <PageHeader title="Admin" sub="Review and manage post submissions" />
+              {isAdmin ? (
+                <AdminPanel />
               ) : (
-                <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-16 flex flex-col items-center gap-4 max-w-sm mx-auto">
-                  <div className="text-gray-400 text-sm font-medium">Enter admin password</div>
-                  <input
-                    type="password"
-                    value={adminInput}
-                    onChange={(e) => { setAdminInput(e.target.value); setAdminError(false); }}
-                    onKeyDown={(e) => e.key === "Enter" && handleAdminUnlock()}
-                    placeholder="Password"
-                    className="w-full bg-white/[0.04] border border-white/10 rounded-lg px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#32fe9f]/50"
-                  />
-                  {adminError && <p className="text-red-400 text-xs">Incorrect password</p>}
-                  <button
-                    onClick={handleAdminUnlock}
-                    className="w-full bg-[#32fe9f]/15 text-[#32fe9f] border border-[#32fe9f]/50 rounded-lg px-4 py-2.5 text-sm font-semibold hover:bg-[#32fe9f]/25 transition-colors"
-                  >
-                    Unlock
-                  </button>
+                <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-16 flex flex-col items-center gap-4">
+                  <div className="text-gray-500 text-sm">You don&apos;t have permission to access this page.</div>
                 </div>
               )}
             </div>
@@ -253,7 +228,7 @@ function SidebarItem({ label, active, onClick }: { label: string; active: boolea
       onClick={onClick}
       className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
         active
-          ? "text-[#32fe9f] bg-[#32fe9f]/[0.08]"
+          ? "text-[#FF6021] bg-[#FF6021]/[0.08]"
           : "text-gray-400 hover:text-white hover:bg-white/[0.04]"
       }`}
     >
