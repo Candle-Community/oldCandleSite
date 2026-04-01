@@ -36,7 +36,7 @@ export async function GET() {
     return acc;
   }, {});
 
-  const members = Object.entries(byUser).map(([discord_id, u]) => {
+  const members = (Object.entries(byUser) as [string, UserMap[string]][]).map(([discord_id, u]) => {
     const cndl_owed = tokenPrice && tokenPrice > 0
       ? ((u.total_views / 1000) * (USD_CPM / tokenPrice)).toFixed(2)
       : ((u.total_views / 1000) * USD_CPM).toFixed(2);
