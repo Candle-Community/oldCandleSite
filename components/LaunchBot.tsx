@@ -1,10 +1,65 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useApiPolling } from "@/hooks/useApiPolling";
 import type { LaunchOverviewData, LaunchMetricData } from "@/types/launch";
 import type { NarrativeOverview } from "@/types/narrative";
+
+// ── Chart types ──
+interface Candle { time: number; open: number; high: number; low: number; close: number; }
+interface ScorePoint { time: number; score: number; }
+
+// ── SOL Candlestick Chart ──
+function SolChart({ candles, scores }: { candles: Candle[]; scores: ScorePoint[] }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!containerRef.current || candles.length === 0) return;
+    let chart: ReturnType<typeof import("lightweight-charts")["createChart"]> | null = null;
+
+    import("lightweight-charts").then(({ createChart, CandlestickSeries, HistogramSeries, LineSeries, ColorType }) => {
+      if (!containerRef.current) return;
+      chart = createChart(containerRef.current, {
+        layout: { background: { type: ColorType.Solid, color: "transparent" }, textColor: "#6b7280", fontFamily: "monospace" },
+        grid: { vertLines: { color: "#1e1e2e" }, horzLines: { color: "#1e1e2e" } },
+        width: containerRef.current.clientWidth,
+        height: 220,
+        crosshair: { mode: 0 },
+        timeScale: { borderColor: "#1e1e2e", timeVisible: false },
+        rightPriceScale: { borderColor: "#1e1e2e", scaleMargins: { top: 0.02, bottom: 0.28 } },
+      });
+
+      const bgSeries = chart.addSeries(HistogramSeries, { priceScaleId: "bgcolor", lastValueVisible: false, priceLineVisible: false });
+      chart.priceScale("bgcolor").applyOptions({ visible: false, scaleMargins: { top: 0, bottom: 0 } });
+
+      const candleSeries = chart.addSeries(CandlestickSeries, {
+        upColor: "#00e676", downColor: "#ff1744", borderUpColor: "#00e676", borderDownColor: "#ff1744", wickUpColor: "#00e676", wickDownColor: "#ff1744",
+      });
+
+      const scoreSeries = chart.addSeries(LineSeries, {
+        priceScaleId: "score", color: "#f0b90b", lineWidth: 2, lastValueVisible: true, priceLineVisible: false,
+        priceFormat: { type: "custom" as const, formatter: (p: number) => p.toFixed(0) },
+      });
+      chart.priceScale("score").applyOptions({ borderColor: "#1e1e2e", scaleMargins: { top: 0.78, bottom: 0.02 } });
+
+      candleSeries.setData(candles.map(c => ({ time: c.time as any, open: c.open, high: c.high, low: c.low, close: c.close })));
+      if (scores.length > 0) {
+        bgSeries.setData(scores.map(s => ({ time: s.time as any, value: 1, color: s.score >= 70 ? "rgba(0,230,118,0.18)" : s.score <= 30 ? "rgba(255,23,68,0.18)" : "rgba(240,185,11,0.14)" })));
+        scoreSeries.setData(scores.map(s => ({ time: s.time as any, value: s.score, color: s.score >= 70 ? "#00e676" : s.score <= 30 ? "#ff1744" : "#f0b90b" })));
+      }
+
+      chart.timeScale().fitContent();
+
+      const ro = new ResizeObserver(entries => { for (const e of entries) chart?.applyOptions({ width: e.contentRect.width }); });
+      ro.observe(containerRef.current!);
+    });
+
+    return () => { chart?.remove(); };
+  }, [candles, scores]);
+
+  return <div ref={containerRef} className="w-full" style={{ height: 220 }} />;
+}
 
 // ── Formatters ──
 const $$ = (v: number) => v >= 1e9 ? `$${(v / 1e9).toFixed(1)}B` : v >= 1e6 ? `$${(v / 1e6).toFixed(1)}M` : v >= 1e3 ? `$${(v / 1e3).toFixed(1)}K` : `$${v.toFixed(0)}`;
@@ -113,6 +168,20 @@ export default function LaunchBot() {
   const { data: launch } = useApiPolling<LaunchOverviewData>("/launch/overview?range=30d", 60000);
   const { data: narr } = useApiPolling<NarrativeOverview>("/narrative/overview", 60000);
   const [selectedNarrative, setSelectedNarrative] = useState<string | null>(null);
+  const [chartData, setChartData] = useState<{ candles: Candle[]; scores: ScorePoint[] } | null>(null);
+
+  const fetchChart = useCallback(async () => {
+    try {
+      const res = await fetch("/api/launchbot/pulse/chart?range=all");
+      if (res.ok) { const d = await res.json(); setChartData(d); }
+    } catch { /* ignore */ }
+  }, []);
+
+  useEffect(() => {
+    fetchChart();
+    const id = setInterval(fetchChart, 60000);
+    return () => clearInterval(id);
+  }, [fetchChart]);
 
   const score = deriveScore(launch);
   const tiers = launch?.metrics.find(m => m.name === "Launch Performance")?.tiers;
@@ -180,26 +249,37 @@ export default function LaunchBot() {
         </G>
       )}
 
-      {/* Row 1: Gauge | Conditions */}
-      <div className="grid grid-cols-1 lg:grid-cols-[180px_1fr] gap-3 mb-3">
-        <G className="p-5 flex items-center justify-center" delay={0.05}>
-          {score !== null
-            ? <Gauge score={score} />
-            : <div className="text-white/15 text-xs animate-pulse text-center">Calculating<br />health score...</div>
-          }
-        </G>
-        <G className="p-5 flex flex-col justify-center" delay={0.1}>
-          <div className="text-xs text-white/50 uppercase tracking-[0.12em] font-bold mb-3">Market Conditions</div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8">
-            <Check label="24h Launches" value={launches} good={launches > 10000} display={N(launches)} />
-            <Check label="Graduation Rate" value={gradRate ?? null} good={(gradRate ?? 0) > 1} display={`${(gradRate ?? 0).toFixed(1)}%`} />
-            <Check label="24h Survival" value={surv?.current ?? null} good={(surv?.current ?? 0) > 20} display={`${(surv?.current ?? 0).toFixed(0)}%`} />
-            <Check label="Buy/Sell Ratio" value={bs?.current ?? null} good={(bs?.current ?? 0) > 0.8} display={(bs?.current ?? 0).toFixed(2)} />
-            <Check label="DEX Volume" value={vol?.current ?? null} good={(vol?.current ?? 0) > 1e9} display={$$(vol?.current ?? 0)} />
+      {/* Row 1: Gauge | Chart | Conditions */}
+      <G className="mb-3 overflow-hidden" delay={0.05}>
+        <div className="grid grid-cols-1 lg:grid-cols-[160px_1fr_200px]">
+          {/* Gauge */}
+          <div className="flex items-center justify-center p-5 border-b lg:border-b-0 lg:border-r border-white/[0.06]">
+            {score !== null
+              ? <Gauge score={score} />
+              : <div className="text-white/15 text-xs animate-pulse text-center">Calculating<br />health score...</div>
+            }
           </div>
-          {launch && <div className="text-[9px] text-white/15 mt-3">Updated {new Date(launch.last_updated).toLocaleTimeString()}</div>}
-        </G>
-      </div>
+          {/* Chart */}
+          <div className="p-3 border-b lg:border-b-0 lg:border-r border-white/[0.06]">
+            {chartData && chartData.candles.length > 0
+              ? <SolChart candles={chartData.candles} scores={chartData.scores} />
+              : <div className="flex items-center justify-center h-[220px] text-white/15 text-xs animate-pulse">Loading chart...</div>
+            }
+          </div>
+          {/* Conditions */}
+          <div className="p-5 flex flex-col justify-center">
+            <div className="text-xs text-white/50 uppercase tracking-[0.12em] font-bold mb-3">Market Conditions</div>
+            <div className="space-y-0.5">
+              <Check label="24h Launches" value={launches} good={launches > 10000} display={N(launches)} />
+              <Check label="Graduation Rate" value={gradRate ?? null} good={(gradRate ?? 0) > 1} display={`${(gradRate ?? 0).toFixed(1)}%`} />
+              <Check label="24h Survival" value={surv?.current ?? null} good={(surv?.current ?? 0) > 20} display={`${(surv?.current ?? 0).toFixed(0)}%`} />
+              <Check label="Buy/Sell Ratio" value={bs?.current ?? null} good={(bs?.current ?? 0) > 0.8} display={(bs?.current ?? 0).toFixed(2)} />
+              <Check label="DEX Volume" value={vol?.current ?? null} good={(vol?.current ?? 0) > 1e9} display={$$(vol?.current ?? 0)} />
+            </div>
+            {launch && <div className="text-[9px] text-white/15 mt-3">Updated {new Date(launch.last_updated).toLocaleTimeString()}</div>}
+          </div>
+        </div>
+      </G>
 
       {/* Row 2: Launch Performance | Launchpad Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3">
