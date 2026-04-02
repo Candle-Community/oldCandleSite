@@ -16,7 +16,11 @@ export interface NarrativeTokenData {
   symbol: string;
   narrative: string | null;
   mcap: number | null;
+  mcap_ath: number | null;
   price_change_pct: number | null;
+  volume_24h: number | null;
+  liquidity_usd: number | null;
+  pair_address: string | null;
   created_at: string | null;
 }
 

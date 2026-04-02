@@ -4,7 +4,8 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useApiPolling } from "@/hooks/useApiPolling";
 import type { LaunchOverviewData, LaunchMetricData } from "@/types/launch";
-import type { NarrativeOverview } from "@/types/narrative";
+import type { NarrativeOverview, NarrativeTokenData } from "@/types/narrative";
+type NarrativeToken = NarrativeTokenData;
 
 // ── Chart types ──
 interface Candle { time: number; open: number; high: number; low: number; close: number; }
@@ -168,6 +169,20 @@ export default function LaunchBot() {
   const { data: launch } = useApiPolling<LaunchOverviewData>("/launch/overview?range=30d", 60000);
   const { data: narr } = useApiPolling<NarrativeOverview>("/narrative/overview", 60000);
   const [selectedNarrative, setSelectedNarrative] = useState<string | null>(null);
+  const [narrativeDetail, setNarrativeDetail] = useState<{ name: string; tokens: NarrativeToken[] } | null>(null);
+  const [narrativeDetailLoading, setNarrativeDetailLoading] = useState(false);
+
+  const selectNarrative = useCallback(async (name: string) => {
+    setSelectedNarrative(name);
+    setNarrativeDetail(null);
+    setNarrativeDetailLoading(true);
+    try {
+      const res = await fetch(`/api/launchbot/narrative/${encodeURIComponent(name)}`);
+      if (res.ok) { const d = await res.json(); setNarrativeDetail(d); }
+    } catch { /* ignore */ } finally {
+      setNarrativeDetailLoading(false);
+    }
+  }, []);
   const [chartData, setChartData] = useState<{ candles: Candle[]; scores: ScorePoint[] } | null>(null);
 
   const fetchChart = useCallback(async () => {
@@ -183,7 +198,9 @@ export default function LaunchBot() {
     return () => clearInterval(id);
   }, [fetchChart]);
 
-  const score = deriveScore(launch);
+  const derivedScore = deriveScore(launch);
+  const chartScore = chartData?.scores?.length ? chartData.scores[chartData.scores.length - 1].score : null;
+  const score = derivedScore ?? chartScore;
   const tiers = launch?.metrics.find(m => m.name === "Launch Performance")?.tiers;
   const act = launch?.metrics.find(m => m.name === "Launchpad Activity") as (LaunchMetricData & { migration_rate?: number; total_graduated?: number }) | undefined;
   const launches = act?.current ?? 0;
@@ -198,11 +215,11 @@ export default function LaunchBot() {
 
   const noApi = !process.env.NEXT_PUBLIC_LAUNCHBOT_CONFIGURED;
 
-  if (selectedNarrative && narr) {
-    const nr = narr.narratives.find(n => n.name === selectedNarrative);
+  if (selectedNarrative) {
+    const nr = narr?.narratives.find(n => n.name === selectedNarrative);
     return (
       <div className="space-y-4">
-        <button onClick={() => setSelectedNarrative(null)} className="text-sm text-white/40 hover:text-white/70 transition-colors">
+        <button onClick={() => { setSelectedNarrative(null); setNarrativeDetail(null); }} className="text-sm text-white/40 hover:text-white/70 transition-colors">
           ← Back to dashboard
         </button>
         {nr && (
@@ -211,11 +228,44 @@ export default function LaunchBot() {
               <span className="text-lg font-bold text-white/80">{nr.name}</span>
               <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${LC_BADGE[nr.lifecycle] || LC_BADGE.fading}`}>{nr.lifecycle}</span>
             </div>
-            <div className="grid grid-cols-3 gap-4 text-sm">
+            <div className="grid grid-cols-3 gap-4 text-sm mb-4">
               <div><div className="text-[10px] text-white/30 uppercase mb-1">Tokens</div><div className="font-bold text-white/80">{nr.token_count}</div></div>
               <div><div className="text-[10px] text-white/30 uppercase mb-1">Avg Gain</div><div className={`font-bold ${nr.avg_gain_pct > 0 ? "text-emerald-400" : "text-red-400"}`}>{P(nr.avg_gain_pct)}</div></div>
               <div><div className="text-[10px] text-white/30 uppercase mb-1">Volume</div><div className="font-bold text-white/80">{$$(nr.total_volume)}</div></div>
             </div>
+            {narrativeDetailLoading && <div className="text-white/20 text-xs animate-pulse">Loading tokens...</div>}
+            {narrativeDetail && narrativeDetail.tokens.length > 0 && (
+              <div className="border-t border-white/[0.06] pt-4">
+                <div className="text-[10px] text-white/30 uppercase tracking-wider mb-2">Tokens in this narrative</div>
+                <div className="space-y-1">
+                  {narrativeDetail.tokens.map((t, i) => {
+                    const up = (t.price_change_pct ?? 0) > 0;
+                    return (
+                      <motion.div key={t.address} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}
+                        className="flex items-center gap-3 py-1.5 border-b border-white/[0.04] last:border-0">
+                        <span className="text-white/20 text-[10px] w-5 tabular-nums">{i + 1}</span>
+                        <div className="flex-1 min-w-0">
+                          <a href={t.pair_address ? `https://dexscreener.com/solana/${t.pair_address}` : `https://dexscreener.com/solana/${t.address}`}
+                            target="_blank" rel="noopener noreferrer"
+                            className="text-[12px] font-semibold text-white/80 hover:text-amber-400 transition-colors truncate block">
+                            {t.name} <span className="text-white/30 font-normal">{t.symbol}</span>
+                          </a>
+                          {t.mcap && <div className="text-[10px] text-white/25">{$$(t.mcap)} mcap{t.volume_24h ? ` · ${$$(t.volume_24h)} vol` : ""}</div>}
+                        </div>
+                        {t.price_change_pct != null && (
+                          <div className={`text-[11px] font-bold tabular-nums px-2 py-0.5 rounded-md ${up ? "bg-emerald-500/15 text-emerald-400" : "bg-red-500/15 text-red-400"}`}>
+                            {P(t.price_change_pct)}
+                          </div>
+                        )}
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            {narrativeDetail && narrativeDetail.tokens.length === 0 && (
+              <div className="text-white/20 text-xs pt-2">No token data available yet.</div>
+            )}
           </G>
         )}
       </div>
@@ -377,7 +427,7 @@ export default function LaunchBot() {
             {narr?.narratives.map((nr, i) => {
               const heat = nr.avg_gain_pct > 100 ? 3 : nr.avg_gain_pct > 30 ? 2 : nr.avg_gain_pct > 0 ? 1 : 0;
               return (
-                <motion.button key={nr.name} onClick={() => setSelectedNarrative(nr.name)}
+                <motion.button key={nr.name} onClick={() => selectNarrative(nr.name)}
                   initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + i * 0.05, duration: 0.3 }}
                   className={`bg-white/[0.02] backdrop-blur-sm border border-white/[0.06] border-l-2 ${LC_LEFT[nr.lifecycle] || LC_LEFT.fading} rounded-xl p-4 text-left hover:bg-white/[0.04] hover:border-white/[0.1] active:scale-[0.98] transition-all w-full group relative`}>
                   {heat >= 2 && <div className="absolute top-2 right-2 text-sm opacity-40">{heat >= 3 ? "🔥🔥" : "🔥"}</div>}
