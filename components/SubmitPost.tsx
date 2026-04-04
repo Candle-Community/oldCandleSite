@@ -188,11 +188,11 @@ function SubmitModal({
 
             <div>
               <label className="text-white text-xs font-medium mb-1.5 block">
-                X Handle <span className="text-gray-600 font-normal">(optional)</span>
+                {platform === "tiktok" ? "TikTok Handle" : "X Handle"} <span className="text-gray-600 font-normal">(optional)</span>
               </label>
               <input
                 type="text"
-                placeholder="@yourhandle"
+                placeholder={platform === "tiktok" ? "@yourtiktok" : "@yourhandle"}
                 value={xHandle}
                 onChange={(e) => setXHandle(e.target.value)}
                 className="w-full bg-[#1a1d24] border border-white/[0.08] rounded-lg px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#32fe9f]/50 transition-colors"
