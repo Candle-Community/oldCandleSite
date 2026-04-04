@@ -2,7 +2,6 @@ import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 
 const CNDL_MINT = "9dXSV8VWuYvGfTzqvkBeoFwH9ihVTybDuWo5VaJPCNDL";
-const USD_CPM = 5;
 
 export async function GET() {
   const session = await auth();
@@ -21,6 +20,7 @@ export async function GET() {
   ]);
 
   const data = await upstream.json();
+  const usdCpm: number = typeof data.usd_cpm === "number" ? data.usd_cpm : 5;
 
   let tokenPrice: number | null = null;
   try {
@@ -32,13 +32,13 @@ export async function GET() {
     tokenPrice = best?.priceUsd ? parseFloat(best.priceUsd) : null;
   } catch { /* ignore price fetch failure */ }
 
-  // Recalculate cndl_owed based on $USD_CPM / live price
+  // Recalculate cndl_owed based on live USD CPM / live token price
   if (Array.isArray(data.posts) && tokenPrice && tokenPrice > 0) {
     data.posts = data.posts.map((p: { views: number; multiplier?: number; [key: string]: unknown }) => ({
       ...p,
-      cndl_owed: (((p.views * (p.multiplier ?? 1)) / 1000) * (USD_CPM / tokenPrice)).toFixed(2),
+      cndl_owed: (((p.views * (p.multiplier ?? 1)) / 1000) * (usdCpm / tokenPrice!)).toFixed(2),
     }));
   }
 
-  return NextResponse.json({ ...data, cpm: USD_CPM, tokenPrice }, { status: upstream.status });
+  return NextResponse.json({ ...data, cpm: usdCpm, tokenPrice }, { status: upstream.status });
 }
