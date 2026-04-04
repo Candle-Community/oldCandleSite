@@ -65,12 +65,24 @@ export default function HomeDashboard({ leaderboard, cpm, stats, posts, discordD
         {/* Logo */}
         <div className="px-5 py-5 border-b border-white/[0.06]">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#32fe9f] to-[#20cb7f] flex items-center justify-center text-black font-bold text-xs shrink-0">
-              C
+            {/* Candle candlestick chart icon */}
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
+              {/* Left candle */}
+              <rect x="3" y="16" width="5" height="8" rx="1" fill="#32fe9f"/>
+              <rect x="4.5" y="13" width="2" height="3" rx="0.5" fill="#32fe9f"/>
+              {/* Middle candle */}
+              <rect x="11" y="11" width="6" height="10" rx="1" fill="#32fe9f"/>
+              <rect x="13" y="8" width="2" height="3" rx="0.5" fill="#32fe9f"/>
+              <rect x="13" y="21" width="2" height="2" rx="0.5" fill="#32fe9f"/>
+              {/* Right candle */}
+              <rect x="20" y="6" width="5" height="13" rx="1" fill="#32fe9f"/>
+              <rect x="21.5" y="3" width="2" height="3" rx="0.5" fill="#32fe9f"/>
+            </svg>
+            <div>
+              <div className="font-bold text-base tracking-tight leading-tight">
+                Candle <span className="elite-gradient">Elite</span>
+              </div>
             </div>
-            <span className="font-bold text-base tracking-tight">
-              Candle <span className="elite-gradient">Elite</span>
-            </span>
           </div>
         </div>
 
@@ -112,10 +124,10 @@ export default function HomeDashboard({ leaderboard, cpm, stats, posts, discordD
                   <button
                     key={s.id}
                     onClick={() => selectTab(s.id)}
-                    className={`w-full text-left px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                    className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                       activeTab === s.id
-                        ? "text-[#FF6021] bg-[#FF6021]/[0.08] font-medium"
-                        : "text-gray-500 hover:text-gray-200 hover:bg-white/[0.04]"
+                        ? "text-[#FF6021] bg-[#FF6021]/[0.08]"
+                        : "text-gray-400 hover:text-white hover:bg-white/[0.04]"
                     }`}
                   >
                     {s.label}

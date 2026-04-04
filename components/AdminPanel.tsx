@@ -108,7 +108,8 @@ export default function AdminPanel() {
         setTimeout(() => setCpmSaved(false), 2000);
       } else {
         const d = await res.json();
-        setCpmError(d.error || "Failed to save");
+        setCpmError(d.error || `Save failed (HTTP ${res.status})`);
+      console.error('[CPM save]', res.status, d);
       }
     } catch {
       setCpmError("Network error");

@@ -82,7 +82,8 @@ function SubmitModal({
         onSubmitted();
         onClose();
       } else {
-        setError(data.error || "Submission failed");
+        setError(data.error || `Submission failed (HTTP ${res.status})`);
+        console.error('[submit]', res.status, data);
       }
     } catch {
       setError("Network error — make sure the tracker API is running");
