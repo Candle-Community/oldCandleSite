@@ -13,6 +13,7 @@ type Post = {
   approved: number; // 0=pending, 1=approved, -1=denied
   notes: string;
   submitted_at: string;
+  platform?: string;
 };
 
 type AdminTab = "pending" | "approved" | "denied" | "tasks";
@@ -30,6 +31,13 @@ export default function AdminPanel() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editViews, setEditViews] = useState("");
   const [editMultiplier, setEditMultiplier] = useState("");
+
+  // CPM widget state
+  const [cpm, setCpm] = useState<number | null>(null);
+  const [cpmInput, setCpmInput] = useState("");
+  const [cpmSaving, setCpmSaving] = useState(false);
+  const [cpmError, setCpmError] = useState<string | null>(null);
+  const [cpmSaved, setCpmSaved] = useState(false);
 
   // Tasks tab state
   type PayoutTask = {
@@ -66,6 +74,48 @@ export default function AdminPanel() {
   }, []);
 
   useEffect(() => { fetchPosts(); }, [fetchPosts]);
+
+  useEffect(() => {
+    fetch("/api/admin/settings")
+      .then(r => r.json())
+      .then(d => {
+        if (typeof d.usd_cpm === "number") {
+          setCpm(d.usd_cpm);
+          setCpmInput(String(d.usd_cpm));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  async function saveCpm() {
+    const val = parseFloat(cpmInput);
+    if (isNaN(val) || val <= 0) {
+      setCpmError("Must be a positive number");
+      return;
+    }
+    setCpmSaving(true);
+    setCpmError(null);
+    setCpmSaved(false);
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ usd_cpm: val }),
+      });
+      if (res.ok) {
+        setCpm(val);
+        setCpmSaved(true);
+        setTimeout(() => setCpmSaved(false), 2000);
+      } else {
+        const d = await res.json();
+        setCpmError(d.error || "Failed to save");
+      }
+    } catch {
+      setCpmError("Network error");
+    } finally {
+      setCpmSaving(false);
+    }
+  }
 
   async function approve(id: number) {
     setActionLoading(id);
@@ -154,6 +204,40 @@ export default function AdminPanel() {
 
   return (
     <div className="space-y-4">
+      {/* CPM Widget */}
+      <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+        <span className="text-xs text-gray-500 font-semibold uppercase tracking-widest flex-shrink-0">
+          CPM Rate
+        </span>
+        <div className="flex items-center gap-2 flex-1">
+          <span className="text-gray-600 text-xs">$</span>
+          <input
+            type="number"
+            step="0.5"
+            min="0.01"
+            value={cpmInput}
+            onChange={e => { setCpmInput(e.target.value); setCpmSaved(false); setCpmError(null); }}
+            onKeyDown={e => e.key === "Enter" && saveCpm()}
+            className="w-20 bg-[#1a1d24] border border-white/[0.08] rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-[#FF6021]/50"
+          />
+          <span className="text-gray-600 text-xs">USD per 1k views</span>
+        </div>
+        {cpmError && <span className="text-red-400 text-xs">{cpmError}</span>}
+        {cpmSaved && <span className="text-[#32fe9f] text-xs">Saved!</span>}
+        {cpm !== null && (
+          <span className="text-gray-600 text-xs">
+            Current: <span className="text-white">${cpm}</span>
+          </span>
+        )}
+        <button
+          onClick={saveCpm}
+          disabled={cpmSaving}
+          className="text-xs px-3 py-1.5 rounded-full font-semibold bg-[#FF6021]/15 text-[#FF6021] border border-[#FF6021]/80 hover:bg-[#FF6021]/30 transition-all disabled:opacity-40 flex-shrink-0"
+        >
+          {cpmSaving ? "Saving…" : "Save"}
+        </button>
+      </div>
+
       {/* Tabs */}
       <div className="border-b border-white/[0.06]">
         <div className="flex gap-6">
@@ -318,6 +402,15 @@ export default function AdminPanel() {
                         {new Date(post.submitted_at).toLocaleDateString("en-US", {
                           month: "short", day: "numeric", year: "numeric",
                         })}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <span className={`text-xs px-2 py-0.5 rounded font-semibold ${
+                        post.platform === "tiktok"
+                          ? "bg-pink-500/15 text-pink-400"
+                          : "bg-sky-500/15 text-sky-400"
+                      }`}>
+                        {post.platform === "tiktok" ? "TikTok" : "X"}
                       </span>
                     </div>
                     <a
