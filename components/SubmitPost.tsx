@@ -53,6 +53,7 @@ function SubmitModal({
 }) {
   const [postUrl, setPostUrl] = useState("");
   const [xHandle, setXHandle] = useState("");
+  const [platform, setPlatform] = useState<"x" | "tiktok">("x");
   const [agreed, setAgreed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -74,7 +75,7 @@ function SubmitModal({
       const res = await fetch("/api/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ postUrl: postUrl.trim(), xHandle: xHandle.trim() }),
+        body: JSON.stringify({ postUrl: postUrl.trim(), xHandle: xHandle.trim(), platform }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -116,7 +117,11 @@ function SubmitModal({
           <div>
             <div className="text-white text-xs font-semibold mb-1">Important</div>
             <p className="text-gray-500 text-xs leading-relaxed">
-              Posts must be <strong className="text-white">publicly visible</strong> on X and owned by your account. Reposted content does not qualify.
+              Posts must be <strong className="text-white">publicly visible</strong> on{" "}
+              {platform === "tiktok" ? "TikTok" : "X"} and owned by your account. Reposted content does not qualify.
+              {platform === "tiktok" && (
+                <> Views are fetched automatically when you submit.</>
+              )}
             </p>
           </div>
         </div>
@@ -140,14 +145,41 @@ function SubmitModal({
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col flex-1 gap-4">
+            {/* Platform toggle */}
+            <div>
+              <label className="text-white text-xs font-medium mb-1.5 block">Platform</label>
+              <div className="flex gap-2">
+                {(["x", "tiktok"] as const).map(p => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => { setPlatform(p); setPostUrl(""); setError(null); }}
+                    className={`flex-1 py-2 rounded-lg text-sm font-semibold border transition-colors ${
+                      platform === p
+                        ? p === "tiktok"
+                          ? "bg-pink-500/15 text-pink-400 border-pink-500/50"
+                          : "bg-sky-500/15 text-sky-400 border-sky-500/50"
+                        : "bg-[#1a1d24] text-gray-500 border-white/[0.08] hover:text-gray-300"
+                    }`}
+                  >
+                    {p === "x" ? "𝕏  X / Twitter" : "♪  TikTok"}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div>
               <label className="text-white text-xs font-medium mb-1.5 block">
-                X Post URL <span className="text-red-400">*</span>
+                {platform === "x" ? "X Post URL" : "TikTok Video URL"} <span className="text-red-400">*</span>
               </label>
               <input
                 type="url"
                 required
-                placeholder="https://x.com/username/status/1234567890"
+                placeholder={
+                  platform === "x"
+                    ? "https://x.com/username/status/1234567890"
+                    : "https://www.tiktok.com/@username/video/1234567890"
+                }
                 value={postUrl}
                 onChange={(e) => setPostUrl(e.target.value)}
                 className="w-full bg-[#1a1d24] border border-white/[0.08] rounded-lg px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#32fe9f]/50 transition-colors"

@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Discord identity not found in session — please sign out and sign back in" }, { status: 401 });
   }
 
-  const { postUrl, xHandle } = await req.json();
+  const { postUrl, xHandle, platform } = await req.json();
   if (!postUrl) {
     return NextResponse.json({ error: "postUrl is required" }, { status: 400 });
   }
@@ -27,6 +27,7 @@ export async function POST(req: NextRequest) {
         discordTag: session.user.discordTag,
         xHandle: xHandle || "",
         postUrl,
+        platform: platform || "x",
       }),
     });
   } catch (err) {
