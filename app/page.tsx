@@ -15,7 +15,7 @@ async function fetchTrackerData() {
     const statsJson = await statsRes.json();
     const postsJson = await postsRes.json();
     const leaderboard = Array.isArray(lbJson?.leaderboard) ? lbJson.leaderboard : [];
-    const cpm         = typeof lbJson?.cpm === "number" ? lbJson.cpm : 5;
+    const cpm         = typeof lbJson?.usd_cpm === "number" ? lbJson.usd_cpm : 5;
     const posts       = Array.isArray(postsJson) ? postsJson : [];
     const stats       = statsJson?.totalViews !== undefined ? statsJson : null;
     return { leaderboard, cpm, stats, posts };

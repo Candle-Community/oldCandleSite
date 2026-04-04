@@ -16,8 +16,6 @@ function formatNum(n: number) {
 
 const medals = ["👑", "🥈", "🥉"];
 
-const USD_CPM = 5;
-
 export default function Leaderboard({
   leaderboard,
   cpm,
@@ -29,7 +27,7 @@ export default function Leaderboard({
 }) {
   function cndlOwed(effective_views: number) {
     if (tokenPrice && tokenPrice > 0) {
-      return ((effective_views / 1000) * (USD_CPM / tokenPrice)).toFixed(2);
+      return ((effective_views / 1000) * (cpm / tokenPrice)).toFixed(2);
     }
     return ((effective_views / 1000) * cpm).toFixed(2);
   }
@@ -59,7 +57,7 @@ export default function Leaderboard({
             {top ? cndlOwed(top.effective_views) : "—"}
           </p>
           <p className="text-sm text-gray-400 mt-1">
-            {top ? `@${top.x_handle} · $${USD_CPM} / 1K views` : `$${USD_CPM} / 1K views`}
+            {top ? `@${top.x_handle} · $${cpm} / 1K views` : `$${cpm} / 1K views`}
           </p>
         </div>
       </div>
@@ -110,7 +108,7 @@ export default function Leaderboard({
       )}
 
       <p className="text-xs text-gray-600 mt-3 text-right">
-        Ranked by effective views · ${USD_CPM} USD / 1K views · Updates live
+        Ranked by effective views · ${cpm} USD / 1K views · Updates live
       </p>
     </div>
   );
