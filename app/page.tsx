@@ -7,9 +7,9 @@ const TRACKER_API = process.env.TRACKER_API_URL || "http://localhost:3001";
 async function fetchTrackerData() {
   try {
     const [leaderboardRes, statsRes, postsRes] = await Promise.all([
-      fetch(`${TRACKER_API}/api/leaderboard`, { next: { revalidate: 60 } }),
-      fetch(`${TRACKER_API}/api/stats`,       { next: { revalidate: 60 } }),
-      fetch(`${TRACKER_API}/api/posts`,       { next: { revalidate: 60 } }),
+      fetch(`${TRACKER_API}/api/leaderboard`, { cache: "no-store" }),
+      fetch(`${TRACKER_API}/api/stats`,       { cache: "no-store" }),
+      fetch(`${TRACKER_API}/api/posts`,       { cache: "no-store" }),
     ]);
     const lbJson    = await leaderboardRes.json();
     const statsJson = await statsRes.json();
