@@ -31,8 +31,6 @@ export default function AdminPanel() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editViews, setEditViews] = useState("");
   const [editMultiplier, setEditMultiplier] = useState("");
-  const [refreshingId, setRefreshingId] = useState<number | null>(null);
-  const [refreshMsg, setRefreshMsg] = useState<{ id: number; msg: string } | null>(null);
 
   // CPM widget state
   const [cpm, setCpm] = useState<number | null>(null);
@@ -146,37 +144,16 @@ export default function AdminPanel() {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        approved: post.approved,
-        notes: post.notes,
-        views: parseInt(editViews) || post.views,
-        multiplier: parseFloat(editMultiplier) || post.multiplier,
+        approved:   post.approved,
+        notes:      post.notes,
+        views:      parseInt(editViews) >= 0 ? parseInt(editViews) : post.views,
+        multiplier: parseFloat(editMultiplier) > 0 ? parseFloat(editMultiplier) : post.multiplier,
       }),
     });
     setEditingId(null);
     await fetchPosts();
     setActionLoading(null);
     router.refresh();
-  }
-
-  async function refreshViews(id: number) {
-    setRefreshingId(id);
-    setRefreshMsg(null);
-    try {
-      const res = await fetch(`/api/admin/posts/${id}/refresh`, { method: "POST" });
-      const d = await res.json();
-      if (res.ok) {
-        setRefreshMsg({ id, msg: `Updated: ${d.views.toLocaleString()} views` });
-        await fetchPosts();
-        router.refresh();
-        setTimeout(() => setRefreshMsg(null), 4000);
-      } else {
-        setRefreshMsg({ id, msg: d.error || "Refresh failed" });
-      }
-    } catch {
-      setRefreshMsg({ id, msg: "Network error" });
-    } finally {
-      setRefreshingId(null);
-    }
   }
 
   async function deny(id: number) {
@@ -461,19 +438,6 @@ export default function AdminPanel() {
                       <div className="text-gray-600 text-xs">views · ×{post.multiplier ?? 1}</div>
                     </div>
 
-                    <button
-                      onClick={() => refreshViews(post.id)}
-                      disabled={refreshingId === post.id}
-                      title="Re-fetch views from X / TikTok API"
-                      className="text-xs px-3 py-1.5 rounded-full font-semibold bg-white/[0.06] text-gray-400 border border-white/10 hover:text-[#32fe9f] hover:border-[#32fe9f]/40 transition-all disabled:opacity-40"
-                    >
-                      {refreshingId === post.id ? "…" : "↻"}
-                    </button>
-                    {refreshMsg?.id === post.id && (
-                      <span className={`text-xs ${refreshMsg.msg.startsWith("Updated") ? "text-[#32fe9f]" : "text-red-400"}`}>
-                        {refreshMsg.msg}
-                      </span>
-                    )}
                     <button
                       onClick={() => {
                         setEditingId(post.id);

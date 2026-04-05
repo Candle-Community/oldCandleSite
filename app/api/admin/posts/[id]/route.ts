@@ -40,12 +40,12 @@ export async function PUT(
   }
 
   const { id } = await params;
-  const { approved, notes } = await req.json();
+  const { approved, notes, views, multiplier } = await req.json();
   const trackerUrl = process.env.TRACKER_API_URL || "http://localhost:3001";
   const password = process.env.ADMIN_PASSWORD || "candle2024";
 
   try {
-    // Fetch the existing post so we don't overwrite views/likes/reposts/multiplier
+    // Fetch the existing post to fill in any fields not provided
     const existing = await fetch(`${trackerUrl}/api/posts`, { cache: "no-store" });
     const allPosts = await existing.json();
     const post = Array.isArray(allPosts) ? allPosts.find((p: { id: number }) => String(p.id) === id) : null;
@@ -55,12 +55,12 @@ export async function PUT(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         password,
-        approved,
-        notes: notes ?? post?.notes ?? "",
-        views:      post?.views      ?? 0,
+        approved:   approved   ?? post?.approved   ?? 0,
+        notes:      notes      ?? post?.notes      ?? "",
+        views:      views      ?? post?.views      ?? 0,
         likes:      post?.likes      ?? 0,
         reposts:    post?.reposts    ?? 0,
-        multiplier: post?.multiplier ?? 1.0,
+        multiplier: multiplier ?? post?.multiplier ?? 1.0,
       }),
     });
     const data = await res.json();
