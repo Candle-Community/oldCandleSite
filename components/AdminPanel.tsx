@@ -53,6 +53,11 @@ export default function AdminPanel() {
   const [taskTokenPrice, setTaskTokenPrice] = useState<number | null>(null);
   const [weekStart, setWeekStart] = useState<string | null>(null);
   const [tasksLoading, setTasksLoading] = useState(false);
+  const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
+  const [taskSubtab, setTaskSubtab] = useState<"pending" | "completed">("pending");
+  const [editingWallet, setEditingWallet] = useState<string | null>(null);
+  const [walletInput, setWalletInput] = useState("");
+  const [walletSaving, setWalletSaving] = useState(false);
 
   const fetchPosts = useCallback(async () => {
     setLoading(true);
@@ -188,9 +193,47 @@ export default function AdminPanel() {
       const data = await res.json();
       setTasks(data.tasks ?? []);
       setTaskTokenPrice(data.tokenPrice ?? null);
-      setWeekStart(data.weekStart ?? null);
+      const week = data.weekStart ?? null;
+      setWeekStart(week);
+      // Load completed IDs from localStorage for this week
+      if (week) {
+        const key = `completed_tasks_${week}`;
+        const stored = JSON.parse(localStorage.getItem(key) || "[]");
+        setCompletedIds(new Set(stored));
+      }
     } finally {
       setTasksLoading(false);
+    }
+  }
+
+  function markPaid(discordId: string) {
+    const key = `completed_tasks_${weekStart}`;
+    const next = new Set(completedIds);
+    next.add(discordId);
+    setCompletedIds(next);
+    localStorage.setItem(key, JSON.stringify([...next]));
+  }
+
+  function unmarkPaid(discordId: string) {
+    const key = `completed_tasks_${weekStart}`;
+    const next = new Set(completedIds);
+    next.delete(discordId);
+    setCompletedIds(next);
+    localStorage.setItem(key, JSON.stringify([...next]));
+  }
+
+  async function saveWallet(discordId: string) {
+    setWalletSaving(true);
+    try {
+      await fetch(`/api/admin/wallets/${discordId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wallet_address: walletInput.trim() }),
+      });
+      setEditingWallet(null);
+      await loadTasks();
+    } finally {
+      setWalletSaving(false);
     }
   }
 
@@ -268,12 +311,15 @@ export default function AdminPanel() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-400">
-                Weekly payout tasks — $CNDL owed to each wallet
-              </p>
+              <p className="text-sm text-gray-400">Weekly payout tasks — $CNDL owed to each wallet</p>
               {weekStart && (
                 <p className="text-xs text-gray-600 mt-0.5">
                   Week of {new Date(weekStart).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                </p>
+              )}
+              {taskTokenPrice && (
+                <p className="text-xs text-gray-600 mt-0.5">
+                  Live price: ${taskTokenPrice < 0.001 ? taskTokenPrice.toFixed(7) : taskTokenPrice.toFixed(4)} / $CNDL
                 </p>
               )}
             </div>
@@ -286,81 +332,148 @@ export default function AdminPanel() {
             </button>
           </div>
 
-          {taskTokenPrice && (
-            <p className="text-xs text-gray-600">
-              Live price: ${taskTokenPrice < 0.001 ? taskTokenPrice.toFixed(7) : taskTokenPrice.toFixed(4)} / $CNDL
-            </p>
+          {/* Subtabs */}
+          {tasks.length > 0 && (
+            <div className="flex gap-4 border-b border-white/[0.06]">
+              {(["pending", "completed"] as const).map(st => {
+                const count = st === "pending"
+                  ? tasks.filter(t => !completedIds.has(t.discord_id)).length
+                  : tasks.filter(t => completedIds.has(t.discord_id)).length;
+                return (
+                  <button
+                    key={st}
+                    onClick={() => setTaskSubtab(st)}
+                    className={`pb-2 text-xs font-semibold capitalize transition-colors border-b-2 ${
+                      taskSubtab === st
+                        ? "text-[#FF6021] border-[#FF6021]"
+                        : "text-gray-500 border-transparent hover:text-gray-300"
+                    }`}
+                  >
+                    {st === "pending" ? "Pending" : "Completed"} <span className="ml-1 opacity-60">{count}</span>
+                  </button>
+                );
+              })}
+            </div>
           )}
 
           {tasks.length === 0 && !tasksLoading ? (
             <div className="py-16 text-center text-gray-600 text-sm">
               Click &quot;Load Tasks&quot; to fetch this week&apos;s payouts.
             </div>
-          ) : (
-            <div className="rounded-xl border border-white/[0.06] overflow-hidden">
-              <div className="grid grid-cols-5 px-5 py-3 text-xs text-gray-500 uppercase tracking-widest border-b border-white/[0.06]">
-                <span>Member</span>
-                <span>Posts</span>
-                <span className="text-right">Views</span>
-                <span className="text-right">$CNDL Owed</span>
-                <span>Wallet Address</span>
-              </div>
-              {tasks.map((task, i) => (
-                <div
-                  key={task.discord_id}
-                  className={`grid grid-cols-5 items-center px-5 py-4 border-b border-white/[0.04] last:border-0 gap-3 ${
-                    !task.wallet_address ? "bg-red-500/[0.03]" : ""
-                  }`}
-                >
-                  <span className="text-sm font-medium text-white">{task.discord_tag}</span>
-                  <span className="text-sm text-gray-400">{task.post_count}</span>
-                  <span className="text-right text-sm font-mono text-gray-300">
-                    {task.total_views.toLocaleString()}
-                  </span>
-                  <div className="text-right">
-                    <div className="text-sm font-mono text-[#32fe9f] font-semibold">
-                      {parseFloat(task.cndl_owed).toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                    </div>
-                    <div className="text-xs text-gray-600">≈ ${task.usd_owed}</div>
-                  </div>
-                  <div className="min-w-0">
-                    {task.wallet_address ? (
-                      <span className="text-xs font-mono text-gray-400 break-all">
-                        {task.wallet_address.slice(0, 6)}…{task.wallet_address.slice(-6)}
-                        <button
-                          onClick={() => navigator.clipboard.writeText(task.wallet_address!)}
-                          className="ml-2 text-gray-600 hover:text-[#FF6021] transition-colors"
-                          title="Copy full address"
-                        >
-                          ⧉
-                        </button>
-                      </span>
-                    ) : (
-                      <span className="text-xs text-red-400/70 italic">No wallet connected</span>
-                    )}
-                  </div>
-                </div>
-              ))}
-              {/* Total row */}
-              {tasks.length > 0 && (
-                <div className="grid grid-cols-5 items-center px-5 py-3 bg-white/[0.02] border-t border-white/[0.08]">
-                  <span className="text-xs text-gray-500 font-semibold uppercase col-span-2">Total</span>
-                  <span className="text-right text-xs font-mono text-gray-400">
-                    {tasks.reduce((s, t) => s + t.total_views, 0).toLocaleString()}
-                  </span>
-                  <div className="text-right">
-                    <div className="text-sm font-mono text-[#32fe9f] font-bold">
-                      {tasks.reduce((s, t) => s + parseFloat(t.cndl_owed), 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                    </div>
-                    <div className="text-xs text-gray-600">
-                      ≈ ${tasks.reduce((s, t) => s + parseFloat(t.usd_owed), 0).toFixed(2)}
-                    </div>
-                  </div>
+          ) : (() => {
+            const shown = tasks.filter(t =>
+              taskSubtab === "pending" ? !completedIds.has(t.discord_id) : completedIds.has(t.discord_id)
+            );
+            return (
+              <div className="rounded-xl border border-white/[0.06] overflow-hidden">
+                <div className="grid grid-cols-6 px-5 py-3 text-xs text-gray-500 uppercase tracking-widest border-b border-white/[0.06]">
+                  <span>Member</span>
+                  <span>Posts</span>
+                  <span className="text-right">Views</span>
+                  <span className="text-right">$CNDL Owed</span>
+                  <span>Wallet Address</span>
                   <span />
                 </div>
-              )}
-            </div>
-          )}
+                {shown.length === 0 && (
+                  <div className="py-10 text-center text-gray-600 text-sm">
+                    No {taskSubtab} tasks.
+                  </div>
+                )}
+                {shown.map(task => (
+                  <div
+                    key={task.discord_id}
+                    className={`grid grid-cols-6 items-center px-5 py-4 border-b border-white/[0.04] last:border-0 gap-3 ${
+                      completedIds.has(task.discord_id) ? "opacity-50" : !task.wallet_address ? "bg-red-500/[0.03]" : ""
+                    }`}
+                  >
+                    <span className="text-sm font-medium text-white">{task.discord_tag}</span>
+                    <span className="text-sm text-gray-400">{task.post_count}</span>
+                    <span className="text-right text-sm font-mono text-gray-300">
+                      {task.total_views.toLocaleString()}
+                    </span>
+                    <div className="text-right">
+                      <div className="text-sm font-mono text-[#32fe9f] font-semibold">
+                        {parseFloat(task.cndl_owed).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                      </div>
+                      <div className="text-xs text-gray-600">≈ ${task.usd_owed}</div>
+                    </div>
+                    {/* Wallet address — editable */}
+                    <div className="min-w-0">
+                      {editingWallet === task.discord_id ? (
+                        <div className="flex items-center gap-1">
+                          <input
+                            autoFocus
+                            value={walletInput}
+                            onChange={e => setWalletInput(e.target.value)}
+                            onKeyDown={e => e.key === "Enter" && saveWallet(task.discord_id)}
+                            className="w-full bg-white/[0.06] border border-white/10 rounded px-2 py-1 text-xs font-mono text-white focus:outline-none focus:border-[#FF6021]/50"
+                            placeholder="Wallet address"
+                          />
+                          <button
+                            onClick={() => saveWallet(task.discord_id)}
+                            disabled={walletSaving}
+                            className="text-[10px] px-2 py-1 rounded bg-[#FF6021]/20 text-[#FF6021] border border-[#FF6021]/50 hover:bg-[#FF6021]/30 disabled:opacity-40"
+                          >
+                            {walletSaving ? "…" : "Save"}
+                          </button>
+                          <button onClick={() => setEditingWallet(null)} className="text-gray-600 hover:text-gray-400 text-[10px] px-1">✕</button>
+                        </div>
+                      ) : task.wallet_address ? (
+                        <span className="text-xs font-mono text-gray-400 flex items-center gap-1">
+                          {task.wallet_address.slice(0, 6)}…{task.wallet_address.slice(-6)}
+                          <button onClick={() => navigator.clipboard.writeText(task.wallet_address!)} className="text-gray-600 hover:text-[#FF6021]" title="Copy">⧉</button>
+                          <button onClick={() => { setEditingWallet(task.discord_id); setWalletInput(task.wallet_address!); }} className="text-gray-600 hover:text-[#FF6021]" title="Edit">✎</button>
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => { setEditingWallet(task.discord_id); setWalletInput(""); }}
+                          className="text-xs text-red-400/70 italic hover:text-red-400 transition-colors"
+                        >
+                          No wallet — click to add
+                        </button>
+                      )}
+                    </div>
+                    {/* Mark paid / undo */}
+                    <div className="flex justify-end">
+                      {completedIds.has(task.discord_id) ? (
+                        <button
+                          onClick={() => unmarkPaid(task.discord_id)}
+                          className="text-[10px] px-2.5 py-1 rounded-full font-semibold bg-white/[0.04] text-gray-500 border border-white/10 hover:text-gray-300 transition-all"
+                        >
+                          Undo
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => markPaid(task.discord_id)}
+                          className="text-[10px] px-2.5 py-1 rounded-full font-semibold bg-[#32fe9f]/10 text-[#32fe9f] border border-[#32fe9f]/40 hover:bg-[#32fe9f]/20 transition-all"
+                        >
+                          ✓ Mark Paid
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {/* Total row — only on pending tab */}
+                {taskSubtab === "pending" && shown.length > 0 && (
+                  <div className="grid grid-cols-6 items-center px-5 py-3 bg-white/[0.02] border-t border-white/[0.08]">
+                    <span className="text-xs text-gray-500 font-semibold uppercase col-span-2">Total</span>
+                    <span className="text-right text-xs font-mono text-gray-400">
+                      {shown.reduce((s, t) => s + t.total_views, 0).toLocaleString()}
+                    </span>
+                    <div className="text-right">
+                      <div className="text-sm font-mono text-[#32fe9f] font-bold">
+                        {shown.reduce((s, t) => s + parseFloat(t.cndl_owed), 0).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                      </div>
+                      <div className="text-xs text-gray-600">
+                        ≈ ${shown.reduce((s, t) => s + parseFloat(t.usd_owed), 0).toFixed(2)}
+                      </div>
+                    </div>
+                    <span /><span />
+                  </div>
+                )}
+              </div>
+            );
+          })()}
         </div>
       )}
 
