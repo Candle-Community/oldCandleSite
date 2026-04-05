@@ -195,7 +195,7 @@ export default function HomeDashboard({ leaderboard, cpm, stats, posts, discordD
           {activeTab === "payouts" && (
             <div className="space-y-10">
               <PageHeader title="Payouts" sub="Live $CNDL token price, holders, and clipping payouts" />
-              <CNDLToken stats={stats} cpm={cpm} tokenData={tokenData} />
+              <CNDLToken stats={stats} cpm={cpm} tokenData={tokenData} clippers={leaderboard.length} />
               <PayoutMembers />
             </div>
           )}

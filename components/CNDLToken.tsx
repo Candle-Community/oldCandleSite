@@ -39,10 +39,12 @@ export default function CNDLToken({
   stats,
   cpm: _cpm,
   tokenData,
+  clippers,
 }: {
   stats: Stats;
   cpm: number;
   tokenData: TokenData;
+  clippers?: number;
 }) {
   const price     = tokenData?.price     ?? null;
   const marketCap = tokenData?.marketCap ?? null;
@@ -88,14 +90,7 @@ export default function CNDLToken({
       </div>
 
       {/* Clipping payout stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div className="card p-4">
-          <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">$CNDL Owed</p>
-          <p className="text-2xl font-bold text-[#32fe9f]">
-            {stats ? parseFloat(stats.totalCndl).toLocaleString() : "—"}
-          </p>
-          <p className="text-xs text-gray-600 mt-1">To clipping team</p>
-        </div>
+      <div className="grid grid-cols-3 gap-4 mb-8">
         <div className="card p-4">
           <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">CPM Rate</p>
           <p className="text-2xl font-bold text-white">${USD_CPM} worth of $CNDL</p>
@@ -113,8 +108,8 @@ export default function CNDLToken({
         </div>
         <div className="card p-4">
           <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">Clippers</p>
-          <p className="text-2xl font-bold text-white">{stats?.members ?? "—"}</p>
-          <p className="text-xs text-gray-600 mt-1">Registered members</p>
+          <p className="text-2xl font-bold text-white">{clippers ?? stats?.members ?? "—"}</p>
+          <p className="text-xs text-gray-600 mt-1">Registered clippers</p>
         </div>
       </div>
 
