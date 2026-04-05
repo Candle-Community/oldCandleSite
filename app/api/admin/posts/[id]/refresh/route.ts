@@ -1,26 +1,31 @@
+import { auth } from "@/auth";
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 
-const TRACKER_API_URL = process.env.TRACKER_API_URL;
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "candle2024";
 const ADMIN_USERS = ["rich.cndl", ".aleedotg"];
 
 export async function POST(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.name || !ADMIN_USERS.includes(session.user.name)) {
+  const session = await auth();
+  if (!session || !ADMIN_USERS.includes(session.user.discordTag ?? "")) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
-  const res = await fetch(`${TRACKER_API_URL}/api/posts/${params.id}/refresh`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ password: ADMIN_PASSWORD }),
-  });
+  const { id } = await params;
+  const trackerUrl = process.env.TRACKER_API_URL || "http://localhost:3001";
+  const password = process.env.ADMIN_PASSWORD || "candle2024";
 
-  const data = await res.json();
-  return NextResponse.json(data, { status: res.status });
+  try {
+    const res = await fetch(`${trackerUrl}/api/posts/${id}/refresh`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password }),
+    });
+    const data = await res.json();
+    return NextResponse.json(data, { status: res.status });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ error: `Cannot reach tracker API: ${msg}` }, { status: 502 });
+  }
 }
