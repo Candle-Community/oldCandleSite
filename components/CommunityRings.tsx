@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 type DiscordData = {
   totalMembers: number;
@@ -102,13 +102,33 @@ function polarToXY(cx: number, cy: number, r: number, angleDeg: number) {
 
 export default function CommunityRings({ discordData }: { discordData: DiscordData }) {
   const [hovered, setHovered] = useState<string | null>(null);
+  const [liveData, setLiveData] = useState<DiscordData>(discordData);
+
+  useEffect(() => {
+    async function refresh() {
+      try {
+        const res = await fetch("/api/discord", { cache: "no-store" });
+        if (!res.ok) return;
+        const json = await res.json();
+        if (json.totalMembers !== undefined) {
+          const total: number = json.totalMembers;
+          const { verified = 0, holder = 0, believer = 0, elite = 0 } = json.rings ?? {};
+          const general = Math.max(0, total - verified - holder - believer - elite);
+          setLiveData({ totalMembers: total, rings: { general, verified, holder, believer, elite } });
+        }
+      } catch {}
+    }
+    refresh();
+    const id = setInterval(refresh, 60_000);
+    return () => clearInterval(id);
+  }, []);
 
   const ringsWithCounts = RINGS.map((r) => ({
     ...r,
-    members: discordData?.rings?.[r.id as keyof typeof discordData.rings] ?? null,
+    members: liveData?.rings?.[r.id as keyof typeof liveData.rings] ?? null,
   }));
 
-  const totalMembers = discordData?.totalMembers ?? null;
+  const totalMembers = liveData?.totalMembers ?? null;
 
   return (
     <div>

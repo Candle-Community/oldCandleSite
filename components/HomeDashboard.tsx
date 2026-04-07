@@ -255,13 +255,13 @@ export default function HomeDashboard({ leaderboard, cpm, stats, posts, discordD
         <div className="px-4 pb-3 space-y-1">
           <div className="flex items-center gap-3 px-3 py-2">
             <a href="https://x.com/candletv" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white transition-colors"><IconX /></a>
-            <a href="https://discord.gg/candletv" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white transition-colors"><IconDiscord /></a>
+            <a href="https://discord.gg/candledottv" target="_blank" rel="noopener noreferrer" className="text-gray-500 hover:text-white transition-colors"><IconDiscord /></a>
           </div>
-          <a href="https://candle.tv/beliefs" target="_blank" rel="noopener noreferrer"
+          <a href="https://beliefs.candle.tv/" target="_blank" rel="noopener noreferrer"
             className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-[0.8rem] font-semibold text-gray-500 hover:text-white hover:bg-white/[0.04] transition-colors">
             <IconDiamond />Our Beliefs
           </a>
-          <a href="https://candle.tv/how-it-works" target="_blank" rel="noopener noreferrer"
+          <a href="https://docs.candle.tv/" target="_blank" rel="noopener noreferrer"
             className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-[0.8rem] font-semibold text-gray-500 hover:text-white hover:bg-white/[0.04] transition-colors">
             <IconDoc />How it Works
           </a>
