@@ -47,17 +47,29 @@ export async function GET() {
   const token = process.env.DISCORD_BOT_TOKEN;
   if (!token) return NextResponse.json({ error: "No bot token" }, { status: 500 });
 
+  // Debug: check guild access first
+  const guildRes = await fetch(
+    `https://discord.com/api/v10/guilds/${GUILD_ID}?with_counts=true`,
+    { headers: { Authorization: `Bot ${token}` } }
+  );
+  if (!guildRes.ok) {
+    const body = await guildRes.text();
+    return NextResponse.json({ error: `Guild API failed: ${guildRes.status}`, body }, { status: 500 });
+  }
+  const guildData = await guildRes.json();
+
   try {
-    const [totalMembers, verified, holder, believer, elite] = await Promise.all([
-      getGuildMemberCount(token),
+    const [verified, holder, believer, elite] = await Promise.all([
       getRoleMemberCount(ROLE_IDS.verified, token),
       getRoleMemberCount(ROLE_IDS.holder, token),
       getRoleMemberCount(ROLE_IDS.believer, token),
       getRoleMemberCount(ROLE_IDS.elite, token),
     ]);
 
+    const totalMembers = guildData.approximate_member_count ?? 0;
+
     return NextResponse.json(
-      { totalMembers, rings: { verified, holder, believer, elite } },
+      { totalMembers, rings: { verified, holder, believer, elite }, _debug: { approximate_member_count: guildData.approximate_member_count } },
       { headers: { "Access-Control-Allow-Origin": "*" } }
     );
   } catch (e) {
